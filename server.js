@@ -7,7 +7,7 @@ const app = express();
 const PORT = 3000;
 
 // In server.js - THIS IS THE CORRECT LINE
-const MONGO_URI = 'mongodb+srv://yakhy2301:Khh%408956@questionnaire-app.xws1mew.mongodb.net/questionnaireDB?retryWrites=true&w=majority&appName=questionnaire-app';
+const MONGO_URI = process.env.MONGO_URI;
 // --- Middleware ---
 app.use(cors()); 
 app.use(express.json());
