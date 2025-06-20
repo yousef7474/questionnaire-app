@@ -1,6 +1,6 @@
 // The base URL of our new backend server
-const API_URL = 'http://localhost:3000/api';
-
+// In script.js
+const API_URL = 'https://questionnaire-app-xd7f.onrender.com/api';
 // This variable will hold the user info returned from the server after login
 let currentUser = null;
 

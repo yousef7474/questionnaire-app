@@ -4,7 +4,7 @@ const path = 'path';
 const mongoose = require('mongoose');
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 // In server.js - THIS IS THE CORRECT LINE
 const MONGO_URI = process.env.MONGO_URI;
@@ -149,5 +149,5 @@ app.post('/api/responses', async (req, res) => {
 // --- Server Start ---
 // =================================================================
 app.listen(PORT, () => {
-    console.log(`Server is running at http://localhost:${PORT}`);
+    console.log(`Server is running on port ${PORT}`);
 });
