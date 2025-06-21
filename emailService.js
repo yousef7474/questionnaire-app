@@ -131,4 +131,10 @@ async function sendDeadlinePassedEmail(employeeEmail, questionTitle) {
 
 
 // Export the functions to be used in server.js
-module.e
+// THIS IS THE LINE THAT WAS MISSING/INCOMPLETE BEFORE
+module.exports = {
+    sendWelcomeEmail,
+    sendNewQuestionEmail,
+    sendReminderEmail,
+    sendDeadlinePassedEmail
+};
