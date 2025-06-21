@@ -1,7 +1,5 @@
 // This MUST be the very first line to ensure all environment variables are loaded
-if (process.env.NODE_ENV !== 'production') {
-    require('dotenv').config();
-}
+require('dotenv').config();
 
 const express = require('express');
 const cors = require('cors');
@@ -67,7 +65,7 @@ const ResponseSchema = new mongoose.Schema({
 const Response = mongoose.model('Response', ResponseSchema);
 
 // =================================================================
-// --- API ROUTES (Now with Email Integration) ---
+// --- API ROUTES (Now with Employee Management) ---
 // =================================================================
 
 // --- Employees API ---
@@ -86,10 +84,7 @@ app.post('/api/employees/register', async (req, res) => {
         }
         const newEmployee = new Employee(req.body);
         await newEmployee.save();
-
-        // --- Send Welcome Email ---
         emailService.sendWelcomeEmail(newEmployee.email, newEmployee.fullName);
-
         res.status(201).json(newEmployee);
     } catch (err) { res.status(400).json({ message: err.message }); }
 });
@@ -113,6 +108,53 @@ app.post('/api/employees/login', async (req, res) => {
     } catch (err) { res.status(500).json({ message: err.message }); }
 });
 
+// --- NEW: UPDATE an employee's details ---
+app.put('/api/employees/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const updates = req.body; // e.g., { department: 'New Department' }
+
+        const updatedEmployee = await Employee.findByIdAndUpdate(id, updates, { new: true });
+        // { new: true } ensures the function returns the *updated* document
+
+        if (!updatedEmployee) {
+            return res.status(404).json({ message: 'Employee not found' });
+        }
+        
+        console.log(`Updated employee: ${updatedEmployee.username}`);
+        res.json(updatedEmployee);
+
+    } catch (err) {
+        console.error('Error updating employee:', err);
+        res.status(500).json({ message: err.message });
+    }
+});
+
+// --- NEW: DELETE an employee by their ID ---
+app.delete('/api/employees/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const employeeToDelete = await Employee.findById(id);
+        if (!employeeToDelete) {
+            return res.status(404).json({ message: 'Employee not found' });
+        }
+
+        // Also delete all responses submitted by this employee
+        await Response.deleteMany({ employeeUsername: employeeToDelete.username });
+
+        // Now delete the employee
+        await Employee.findByIdAndDelete(id);
+
+        console.log(`Deleted employee ${employeeToDelete.username} and their responses.`);
+        res.status(204).send(); // Success, no content to return
+    } catch (err) {
+        console.error('Error deleting employee:', err);
+        res.status(500).json({ message: err.message });
+    }
+});
+
+
 // --- Questions API ---
 app.get('/api/questions', async (req, res) => {
     try {
@@ -125,8 +167,6 @@ app.post('/api/questions', async (req, res) => {
     try {
         const newQuestion = new Question(req.body);
         await newQuestion.save();
-
-        // --- Send New Question Notifications ---
         if (newQuestion.targetEmployees.includes('all')) {
             const allEmployees = await Employee.find({}, 'email');
             console.log(`Sending new question notification to all ${allEmployees.length} employees.`);
@@ -140,7 +180,6 @@ app.post('/api/questions', async (req, res) => {
                 emailService.sendNewQuestionEmail(emp.email, newQuestion.title, newQuestion.expiryTime);
             });
         }
-
         res.status(201).json(newQuestion);
     } catch (err) { res.status(400).json({ message: err.message }); }
 });
@@ -173,45 +212,34 @@ app.post('/api/responses', async (req, res) => {
 // =================================================================
 // --- SCHEDULED TASKS (CRON JOBS) ---
 // =================================================================
-// This will run every hour, at the start of the hour (e.g., 1:00, 2:00, 3:00).
 console.log('Cron job for email reminders scheduled to run every hour.');
 cron.schedule('0 * * * *', async () => {
     const now = new Date();
     console.log(`[${now.toLocaleString()}] Running hourly check for email reminders...`);
 
     try {
-        // --- 24-Hour Reminder Logic ---
-        // Find questions expiring between 24 and 25 hours from now.
         const reminderTimeStart = new Date(now.getTime() + (24 * 60 * 60 * 1000));
         const reminderTimeEnd = new Date(now.getTime() + (25 * 60 * 60 * 1000));
-
         const questionsForReminder = await Question.find({
             expiryTime: { $gte: reminderTimeStart, $lt: reminderTimeEnd }
         });
 
-        // --- Deadline Passed Logic ---
-        // Find questions whose deadline was between 24 and 25 hours ago.
         const deadlinePassedStart = new Date(now.getTime() - (25 * 60 * 60 * 1000));
         const deadlinePassedEnd = new Date(now.getTime() - (24 * 60 * 60 * 1000));
-
         const questionsDeadlinePassed = await Question.find({
             expiryTime: { $gte: deadlinePassedStart, $lt: deadlinePassedEnd }
         });
 
-        // --- Process Reminders ---
         if (questionsForReminder.length > 0) {
             console.log(`Found ${questionsForReminder.length} question(s) for 24-hour reminder.`);
             for (const q of questionsForReminder) {
                 const responses = await Response.find({ questionId: q._id }).select('employeeUsername -_id');
                 const respondedUsernames = responses.map(r => r.employeeUsername);
-
                 const query = { username: { $nin: respondedUsernames } };
                 if (!q.targetEmployees.includes('all')) {
                     query.username.$in = q.targetEmployees;
                 }
-
                 const employeesToRemind = await Employee.find(query, 'email username');
-                
                 console.log(`Sending ${employeesToRemind.length} reminders for question: "${q.title}"`);
                 employeesToRemind.forEach(emp => {
                     emailService.sendReminderEmail(emp.email, q.title);
@@ -219,27 +247,22 @@ cron.schedule('0 * * * *', async () => {
             }
         }
 
-        // --- Process Deadline Passed Notifications ---
         if (questionsDeadlinePassed.length > 0) {
             console.log(`Found ${questionsDeadlinePassed.length} question(s) for deadline-passed notification.`);
             for (const q of questionsDeadlinePassed) {
                 const responses = await Response.find({ questionId: q._id }).select('employeeUsername -_id');
                 const respondedUsernames = responses.map(r => r.employeeUsername);
-
                 const query = { username: { $nin: respondedUsernames } };
                 if (!q.targetEmployees.includes('all')) {
                     query.username.$in = q.targetEmployees;
                 }
-                
                 const employeesToNotify = await Employee.find(query, 'email username');
-
                 console.log(`Sending ${employeesToNotify.length} deadline-passed notifications for question: "${q.title}"`);
                 employeesToNotify.forEach(emp => {
                     emailService.sendDeadlinePassedEmail(emp.email, q.title);
-});
+                });
             }
         }
-
     } catch (error) {
         console.error("Error during scheduled cron job:", error);
     }
