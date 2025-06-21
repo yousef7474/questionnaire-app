@@ -4,8 +4,8 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
-const cron = require('node-cron'); // The task scheduler
-const emailService = require('./emailService'); // Our custom email service
+const cron = require('node-cron');
+const emailService = require('./emailService');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -15,7 +15,7 @@ const MONGO_URI = process.env.MONGO_URI;
 
 // --- Middleware ---
 const corsOptions = {
-  origin: 'https://questionnaire-app-xd7f.onrender.com', // Your frontend URL
+  origin: 'https://questionnaire-app-xd7f.onrender.com',
   optionsSuccessStatus: 200
 };
 app.use(cors(corsOptions));
@@ -65,8 +65,17 @@ const ResponseSchema = new mongoose.Schema({
 const Response = mongoose.model('Response', ResponseSchema);
 
 // =================================================================
-// --- API ROUTES (Now with Employee Management) ---
+// --- API ROUTES ---
 // =================================================================
+
+// --- NEW: Route to get public Cloudinary configuration ---
+app.get('/api/config/cloudinary', (req, res) => {
+    res.json({
+        cloudName: process.env.CLOUDINARY_CLOUD_NAME,
+        uploadPreset: process.env.CLOUDINARY_UPLOAD_PRESET
+    });
+});
+
 
 // --- Employees API ---
 app.get('/api/employees', async (req, res) => {
@@ -108,46 +117,33 @@ app.post('/api/employees/login', async (req, res) => {
     } catch (err) { res.status(500).json({ message: err.message }); }
 });
 
-// --- NEW: UPDATE an employee's details ---
 app.put('/api/employees/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        const updates = req.body; // e.g., { department: 'New Department' }
-
+        const updates = req.body;
         const updatedEmployee = await Employee.findByIdAndUpdate(id, updates, { new: true });
-        // { new: true } ensures the function returns the *updated* document
-
         if (!updatedEmployee) {
             return res.status(404).json({ message: 'Employee not found' });
         }
-        
         console.log(`Updated employee: ${updatedEmployee.username}`);
         res.json(updatedEmployee);
-
     } catch (err) {
         console.error('Error updating employee:', err);
         res.status(500).json({ message: err.message });
     }
 });
 
-// --- NEW: DELETE an employee by their ID ---
 app.delete('/api/employees/:id', async (req, res) => {
     try {
         const { id } = req.params;
-
         const employeeToDelete = await Employee.findById(id);
         if (!employeeToDelete) {
             return res.status(404).json({ message: 'Employee not found' });
         }
-
-        // Also delete all responses submitted by this employee
         await Response.deleteMany({ employeeUsername: employeeToDelete.username });
-
-        // Now delete the employee
         await Employee.findByIdAndDelete(id);
-
         console.log(`Deleted employee ${employeeToDelete.username} and their responses.`);
-        res.status(204).send(); // Success, no content to return
+        res.status(204).send();
     } catch (err) {
         console.error('Error deleting employee:', err);
         res.status(500).json({ message: err.message });
@@ -216,7 +212,6 @@ console.log('Cron job for email reminders scheduled to run every hour.');
 cron.schedule('0 * * * *', async () => {
     const now = new Date();
     console.log(`[${now.toLocaleString()}] Running hourly check for email reminders...`);
-
     try {
         const reminderTimeStart = new Date(now.getTime() + (24 * 60 * 60 * 1000));
         const reminderTimeEnd = new Date(now.getTime() + (25 * 60 * 60 * 1000));

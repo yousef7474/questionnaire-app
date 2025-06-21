@@ -9,6 +9,24 @@ let questions = [];
 let responses = [];
 let employees = [];
 
+// NEW: This will hold our Cloudinary configuration
+let cloudinaryConfig = null;
+
+// NEW: Helper function to fetch Cloudinary config from our server
+async function getCloudinaryConfig() {
+    if (!cloudinaryConfig) {
+        try {
+            const res = await fetch(`${API_URL}/config/cloudinary`);
+            if (!res.ok) throw new Error('Failed to fetch Cloudinary config.');
+            cloudinaryConfig = await res.json();
+        } catch (error) {
+            console.error("Could not fetch Cloudinary config", error);
+        }
+    }
+    return cloudinaryConfig;
+}
+
+
 // =================================================================
 // --- Theme & Language Logic ---
 // =================================================================
@@ -87,7 +105,23 @@ const translations = {
         employee_dashboard_title: "Employee Dashboard",
         my_profile_btn: "My Profile",
         edit_profile_btn: "Edit Profile",
-        your_questions_title: "Your Questions"
+        your_questions_title: "Your Questions",
+        no_questions_available: "No questions are currently available for you.",
+        your_response: "Your Response:",
+        attachment_label: "Attachment:",
+        view_attachment_link: "View Attachment",
+        submitted_on: "Submitted on:",
+        yes_option: "Yes",
+        no_option: "No",
+        attachment_label_optional: "Attachment (Optional):",
+        paste_url_placeholder: "Or paste a URL",
+        submit_response_btn: "Submit Response",
+        profile_username: "Username:",
+        profile_fullname: "Full Name:",
+        profile_email: "Email:",
+        profile_phone: "Phone:",
+        profile_department: "Department:",
+        profile_since: "Member Since:"
     },
     ar: {
         app_title: "نظام استبيان الموظفين",
@@ -144,7 +178,23 @@ const translations = {
         employee_dashboard_title: "لوحة تحكم الموظف",
         my_profile_btn: "ملفي الشخصي",
         edit_profile_btn: "تعديل الملف الشخصي",
-        your_questions_title: "أسئلتك"
+        your_questions_title: "أسئلتك",
+        no_questions_available: "لا توجد أسئلة متاحة لك حاليًا.",
+        your_response: "إجابتك:",
+        attachment_label: "المرفق:",
+        view_attachment_link: "عرض المرفق",
+        submitted_on: "تم الإرسال في:",
+        yes_option: "نعم",
+        no_option: "لا",
+        attachment_label_optional: "مرفق (اختياري):",
+        paste_url_placeholder: "أو الصق رابطًا هنا",
+        submit_response_btn: "إرسال الإجابة",
+        profile_username: "اسم المستخدم:",
+        profile_fullname: "الاسم الكامل:",
+        profile_email: "البريد الإلكتروني:",
+        profile_phone: "الهاتف:",
+        profile_department: "القسم:",
+        profile_since: "عضو منذ:"
     }
 };
 
@@ -533,34 +583,78 @@ document.getElementById('questionForm').addEventListener('submit', async functio
 
 async function submitResponse(event, questionId) {
     event.preventDefault();
-    const answer = document.querySelector(`input[name="answer_${questionId}"]:checked`).value;
-    const attachmentUrl = document.getElementById(`url_${questionId}`).value || ''; 
-    
-    const responseData = {
-        questionId: questionId,
-        employeeUsername: currentUser.username,
-        employeeFullName: currentUser.fullName,
-        answer: answer,
-        attachmentUrl: attachmentUrl,
-    };
-    
+
+    const form = event.target;
+    const submitButton = form.querySelector('button[type="submit"]');
+    const originalButtonText = submitButton.textContent;
+
     try {
+        submitButton.disabled = true;
+        submitButton.textContent = 'Submitting...';
+
+        const answer = document.querySelector(`input[name="answer_${questionId}"]:checked`).value;
+        const fileInput = document.getElementById(`attachment_${questionId}`);
+        const urlInput = document.getElementById(`url_${questionId}`);
+        
+        let attachmentUrl = urlInput.value.trim();
+
+        if (fileInput.files.length > 0) {
+            submitButton.textContent = 'Uploading file...';
+            
+            const file = fileInput.files[0];
+            const config = await getCloudinaryConfig();
+            
+            if (!config || !config.cloudName || !config.uploadPreset) {
+                throw new Error("Cloudinary configuration is missing. Cannot upload file.");
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('upload_preset', config.uploadPreset);
+
+            const cloudinaryRes = await fetch(`https://api.cloudinary.com/v1_1/${config.cloudName}/upload`, {
+                method: 'POST',
+                body: formData,
+            });
+
+            if (!cloudinaryRes.ok) {
+                console.error('Cloudinary upload error:', await cloudinaryRes.text());
+                throw new Error('File upload failed.');
+            }
+
+            const cloudinaryData = await cloudinaryRes.json();
+            attachmentUrl = cloudinaryData.secure_url;
+        }
+
+        submitButton.textContent = 'Saving response...';
+
+        const responseData = {
+            questionId: questionId,
+            employeeUsername: currentUser.username,
+            employeeFullName: currentUser.fullName,
+            answer: answer,
+            attachmentUrl: attachmentUrl,
+        };
+        
         const res = await fetch(`${API_URL}/responses`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(responseData)
         });
-        if (!res.ok) throw new Error('Failed to submit response.');
 
-        const newResponse = await res.json();
-        responses.push(newResponse);
+        if (!res.ok) throw new Error('Failed to submit response to our server.');
 
+        responses.push(await res.json());
         alert('Response submitted successfully!');
         renderEmployeeDashboard();
+
     } catch (error) {
         alert(`Error: ${error.message}`);
+        submitButton.disabled = false;
+        submitButton.textContent = originalButtonText;
     }
 }
+
 
 async function deleteQuestion(id) {
     if (!confirm('Are you sure you want to delete this question and all its associated responses?')) return;
@@ -590,7 +684,6 @@ async function deleteEmployee(id) {
         }
 
         alert('Employee deleted successfully.');
-
         await fetchAllData();
         renderAdminDashboard();
 
@@ -623,7 +716,6 @@ async function editEmployee(id, currentDepartment) {
         }
         
         alert('Employee updated successfully!');
-
         await fetchAllData();
         renderAdminDashboard();
 
@@ -702,7 +794,6 @@ function editProfile() {
     }
 }
 
-// Export functions remain largely the same
 function exportQuestionsToExcel() {
     const data = questions.map(q => ({
         'Question': q.title,
