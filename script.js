@@ -170,20 +170,16 @@ function setLanguage(lang) {
         document.body.classList.remove('rtl');
         document.documentElement.lang = 'en';
     }
-    localStorage.setItem('language', lang); // Save choice
+    localStorage.setItem('language', lang);
 }
 
-// Apply saved settings when the page loads
 document.addEventListener('DOMContentLoaded', () => {
-    // Apply theme
     const savedTheme = localStorage.getItem('theme') || 'light';
     applyTheme(savedTheme);
     
-    // Apply language
     const savedLang = localStorage.getItem('language') || 'en';
     setLanguage(savedLang);
 
-    // Add a single, delegated event listener for theme toggles
     document.body.addEventListener('click', function(event) {
         if (event.target.id === 'themeToggle' || event.target.id === 'employeeThemeToggle') {
             toggleTheme();
@@ -384,6 +380,10 @@ function loadEmployees() {
                 <p><strong>Total Responses:</strong> ${responseCount}</p>
                 <p><strong>Registered:</strong> ${new Date(emp.registeredAt).toLocaleDateString()}</p>
             </div>
+            <div class="button-group" style="display: flex; gap: 10px; margin-top: 15px;">
+                 <button class="info-btn" onclick="editEmployee('${emp._id}', '${emp.department || ''}')">Edit</button>
+                 <button class="danger-btn" onclick="deleteEmployee('${emp._id}')">Delete</button>
+            </div>
         `;
         employeesList.appendChild(card);
     });
@@ -452,7 +452,7 @@ function loadEmployeeQuestions() {
     
     if (myQuestions.length === 0) {
         employeeQuestionsDiv.innerHTML = '<div class="question-card"><p data-translate="no_questions_available">No questions are currently available for you.</p></div>';
-        setLanguage(localStorage.getItem('language') || 'en'); // Re-apply language
+        setLanguage(localStorage.getItem('language') || 'en');
         return;
     }
 
@@ -494,7 +494,7 @@ function loadEmployeeQuestions() {
         
         employeeQuestionsDiv.appendChild(card);
     });
-    setLanguage(localStorage.getItem('language') || 'en'); // Re-apply language after creating dynamic content
+    setLanguage(localStorage.getItem('language') || 'en');
 }
 
 
@@ -576,6 +576,63 @@ async function deleteQuestion(id) {
     }
 }
 
+async function deleteEmployee(id) {
+    if (!confirm('Are you sure you want to permanently delete this employee and all of their responses? This cannot be undone.')) {
+        return;
+    }
+    
+    try {
+        const res = await fetch(`${API_URL}/employees/${id}`, { method: 'DELETE' });
+
+        if (res.status !== 204) {
+            const errorData = await res.json();
+            throw new Error(errorData.message || 'Failed to delete employee.');
+        }
+
+        alert('Employee deleted successfully.');
+
+        await fetchAllData();
+        renderAdminDashboard();
+
+    } catch (error) {
+        alert(`Error: ${error.message}`);
+    }
+}
+
+async function editEmployee(id, currentDepartment) {
+    const newDepartment = prompt('Enter the new department for this employee:', currentDepartment);
+
+    if (newDepartment === null || newDepartment.trim() === '') {
+        return;
+    }
+    
+    const updates = { department: newDepartment };
+
+    try {
+        const res = await fetch(`${API_URL}/employees/${id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(updates),
+        });
+
+        if (!res.ok) {
+            const errorData = await res.json();
+            throw new Error(errorData.message || 'Failed to update employee.');
+        }
+        
+        alert('Employee updated successfully!');
+
+        await fetchAllData();
+        renderAdminDashboard();
+
+    } catch (error) {
+        alert(`Error: ${error.message}`);
+    }
+}
+
+
 // =================================================================
 // --- Helper & Utility Functions ---
 // =================================================================
@@ -610,7 +667,7 @@ function loadEmployeeOptions() {
         option.textContent = `${emp.fullName} (${emp.department || 'No Dept'})`;
         select.appendChild(option);
     });
-    setLanguage(localStorage.getItem('language') || 'en'); // Re-apply language
+    setLanguage(localStorage.getItem('language') || 'en');
 }
 
 function showEmployeeProfile() {
@@ -633,10 +690,8 @@ function showEmployeeProfile() {
 }
 
 function editProfile() {
-    // Basic prompt, can be improved with a modal
     const newEmail = prompt('Enter new email:', currentUser.email);
     if (newEmail) {
-        // In a real app, this would be a PATCH/PUT request to the server
         currentUser.email = newEmail;
         const empIndex = employees.findIndex(e => e._id === currentUser._id);
         if (empIndex !== -1) {
@@ -647,14 +702,14 @@ function editProfile() {
     }
 }
 
-// Export functions remain largely the same, but should be updated to use current language for headers
+// Export functions remain largely the same
 function exportQuestionsToExcel() {
     const data = questions.map(q => ({
         'Question': q.title,
         'Release Date': new Date(q.releaseTime).toLocaleString(),
         'Expiry Date': q.expiryTime ? new Date(q.expiryTime).toLocaleString() : 'No expiry',
         'Target': q.targetEmployees.join(', '),
-        'Status': 'N/A', // getStatus is not available here, simplify for export
+        'Status': 'N/A',
         'Responses': responses.filter(r => r.questionId === q._id).length,
         'Created By': q.createdBy,
         'Created At': new Date(q.createdAt).toLocaleString()
