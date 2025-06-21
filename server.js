@@ -1,5 +1,7 @@
 // This MUST be the very first line to ensure all environment variables are loaded
-require('dotenv').config();
+if (process.env.NODE_ENV !== 'production') {
+    require('dotenv').config();
+}
 
 const express = require('express');
 const cors = require('cors');
