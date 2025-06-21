@@ -437,3 +437,65 @@ body.rtl .reminder-badge {
     margin-left: 0;
     margin-right: 10px;
 }
+
+/* =================================================================
+--- NEW: Responsive Styles (for tablets and phones) ---
+================================================================= */
+
+@media (max-width: 768px) {
+    /* Reduce overall padding on small screens */
+    body {
+        padding: 10px;
+    }
+
+    /* Make the app header stack vertically */
+    .app-header {
+        flex-direction: column;
+        gap: 15px;
+        padding: 15px;
+    }
+
+    /* Adjust the logo/title alignment */
+    .logo-title {
+        flex-direction: column;
+        gap: 10px;
+        text-align: center;
+    }
+    
+    body.rtl .logo-title {
+        flex-direction: column; /* Keep it stacked even in RTL */
+    }
+
+    /* Reduce the size of the main titles */
+    h1 {
+        font-size: 24px;
+    }
+
+    /* Make the stat cards slightly smaller */
+    .stat-number {
+        font-size: 32px;
+    }
+    
+    .stat-label {
+        font-size: 14px;
+    }
+
+    /* Reduce padding on the login/register forms */
+    .login-container, .register-container {
+        padding: 25px;
+        margin: 20px auto;
+    }
+
+    /* Make dashboard buttons take full width for easier tapping */
+    .app-header div:last-child {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        width: 100%;
+        gap: 10px;
+    }
+    
+    body.rtl .app-header div:last-child {
+        flex-direction: row; /* Keep buttons in a row that can wrap */
+    }
+}
