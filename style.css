@@ -1,3 +1,45 @@
+/* --- THEME AND COLOR VARIABLES --- */
+:root {
+    --bg-primary: white;
+    --bg-secondary: #f7fafc;
+    --bg-app: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --text-primary: #333;
+    --text-secondary: #666;
+    --text-on-btn: white;
+    --border-color: #ddd;
+    --card-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    --card-hover-shadow: 0 5px 20px rgba(0,0,0,0.15);
+    --radio-hover-bg: #f7f9ff;
+    --tab-bg: #e2e8f0;
+    --tab-active-bg: white;
+    --response-yes-bg: #c6f6d5;
+    --response-yes-text: #22543d;
+    --response-no-bg: #fed7d7;
+    --response-no-text: #742a2a;
+    --notification-bg: #e6fffa;
+}
+
+body.dark-theme {
+    --bg-primary: #1a202c;
+    --bg-secondary: #2d3748;
+    --bg-app: linear-gradient(135deg, #2c3e50 0%, #1d2b3a 100%);
+    --text-primary: #e2e8f0;
+    --text-secondary: #a0aec0;
+    --border-color: #4a5568;
+    --card-shadow: 0 2px 10px rgba(0,0,0,0.4);
+    --card-hover-shadow: 0 5px 20px rgba(0,0,0,0.5);
+    --radio-hover-bg: #2d3748;
+    --tab-bg: #2d3748;
+    --tab-active-bg: #4a5568;
+    --response-yes-bg: #2f855a;
+    --response-yes-text: #f0fff4;
+    --response-no-bg: #c53030;
+    --response-no-text: #fff5f5;
+    --notification-bg: #2c5282;
+}
+/* --- END OF VARIABLES --- */
+
+
 * {
     margin: 0;
     padding: 0;
@@ -6,9 +48,11 @@
 
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--bg-app);
+    color: var(--text-primary);
     min-height: 100vh;
     padding: 20px;
+    transition: background 0.3s ease, color 0.3s ease;
 }
 
 .container {
@@ -19,39 +63,41 @@ body {
 .login-container, .register-container {
     max-width: 450px;
     margin: 50px auto;
-    background: white;
+    background: var(--bg-primary);
     border-radius: 10px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.2);
     padding: 40px;
 }
 
 .app-header {
-    background: white;
+    background: var(--bg-primary);
     border-radius: 10px;
     padding: 20px;
     margin-bottom: 20px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    box-shadow: var(--card-shadow);
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
 h1, h2, h3 {
-    color: #333;
+    color: var(--text-primary);
 }
 
 input, select, textarea {
     width: 100%;
     padding: 10px;
     margin-bottom: 15px;
-    border: 1px solid #ddd;
+    border: 1px solid var(--border-color);
     border-radius: 5px;
     font-size: 16px;
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
 }
 
 button {
     background: #667eea;
-    color: white;
+    color: var(--text-on-btn);
     border: none;
     padding: 12px 24px;
     border-radius: 5px;
@@ -91,23 +137,23 @@ button:hover {
 }
 
 .question-card {
-    background: white;
+    background: var(--bg-primary);
     border-radius: 10px;
     padding: 25px;
     margin-bottom: 20px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    transition: transform 0.3s ease;
+    box-shadow: var(--card-shadow);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .question-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+    box-shadow: var(--card-hover-shadow);
 }
 
 .response-section {
     margin-top: 20px;
     padding-top: 20px;
-    border-top: 1px solid #eee;
+    border-top: 1px solid var(--border-color);
 }
 
 .radio-group {
@@ -121,14 +167,14 @@ button:hover {
     align-items: center;
     cursor: pointer;
     padding: 10px 20px;
-    border: 2px solid #ddd;
+    border: 2px solid var(--border-color);
     border-radius: 5px;
     transition: all 0.3s ease;
 }
 
 .radio-label:hover {
     border-color: #667eea;
-    background: #f7f9ff;
+    background: var(--radio-hover-bg);
 }
 
 .radio-label input[type="radio"] {
@@ -145,7 +191,7 @@ button:hover {
 .attachment-section {
     margin-top: 15px;
     padding: 15px;
-    background: #f7fafc;
+    background: var(--bg-secondary);
     border-radius: 5px;
 }
 
@@ -162,15 +208,16 @@ button:hover {
 
 .tab {
     padding: 10px 20px;
-    background: #e2e8f0;
+    background: var(--tab-bg);
+    color: var(--text-primary);
     border-radius: 5px;
     cursor: pointer;
     transition: all 0.3s ease;
 }
 
 .tab.active {
-    background: white;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    background: var(--tab-active-bg);
+    box-shadow: var(--card-shadow);
 }
 
 .responses-grid {
@@ -179,10 +226,10 @@ button:hover {
 }
 
 .response-card {
-    background: white;
+    background: var(--bg-primary);
     border-radius: 10px;
     padding: 20px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    box-shadow: var(--card-shadow);
 }
 
 .response-header {
@@ -190,7 +237,7 @@ button:hover {
     justify-content: space-between;
     margin-bottom: 15px;
     padding-bottom: 15px;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid var(--border-color);
 }
 
 .response-answer {
@@ -202,13 +249,13 @@ button:hover {
 }
 
 .response-answer.yes {
-    background: #c6f6d5;
-    color: #22543d;
+    background: var(--response-yes-bg);
+    color: var(--response-yes-text);
 }
 
 .response-answer.no {
-    background: #fed7d7;
-    color: #742a2a;
+    background: var(--response-no-bg);
+    color: var(--response-no-text);
 }
 
 .attachment-link {
@@ -247,7 +294,7 @@ button:hover {
 }
 
 .employee-info {
-    background: #f7fafc;
+    background: var(--bg-secondary);
     padding: 15px;
     border-radius: 5px;
     margin-bottom: 15px;
@@ -255,10 +302,15 @@ button:hover {
 
 .employee-info p {
     margin: 5px 0;
+    color: var(--text-secondary);
+}
+.employee-info p strong {
+    color: var(--text-primary);
 }
 
+
 .notification-settings {
-    background: #e6fffa;
+    background: var(--notification-bg);
     padding: 15px;
     border-radius: 5px;
     margin-top: 15px;
@@ -287,7 +339,7 @@ button:hover {
 }
 
 .export-section {
-    background: white;
+    background: var(--bg-primary);
     padding: 20px;
     border-radius: 10px;
     margin-bottom: 20px;
@@ -304,11 +356,11 @@ button:hover {
 }
 
 .stat-card {
-    background: white;
+    background: var(--bg-primary);
     padding: 20px;
     border-radius: 10px;
     text-align: center;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    box-shadow: var(--card-shadow);
 }
 
 .stat-number {
@@ -318,6 +370,70 @@ button:hover {
 }
 
 .stat-label {
-    color: #666;
+    color: var(--text-secondary);
     margin-top: 5px;
+}
+
+/* --- NEW STYLES FOR FEATURES --- */
+
+.logo-title {
+    display: flex;
+    align-items: center;
+    gap: 15px; /* Adds space between logo and title */
+}
+
+.logo-title img {
+    height: 40px; /* Control the size of the logo in the header */
+}
+
+.lang-btn {
+    background: #a0aec0;
+    padding: 8px 12px;
+    margin-left: 5px;
+}
+.lang-btn:hover {
+    background: #718096;
+}
+
+/* --- RTL STYLES FOR ARABIC --- */
+
+body.rtl {
+    direction: rtl;
+    text-align: right;
+    font-family: 'Tahoma', 'Segoe UI', sans-serif; /* A font that supports Arabic well */
+}
+
+body.rtl .app-header {
+    flex-direction: row-reverse;
+}
+
+body.rtl .logo-title {
+    flex-direction: row-reverse; /* Flips the logo and title */
+}
+
+body.rtl .app-header div:last-child {
+    display: flex;
+    flex-direction: row-reverse;
+    align-items: center;
+}
+
+body.rtl .app-header #adminUsername,
+body.rtl .app-header #employeeUsername {
+    margin-right: 0;
+    margin-left: 20px; /* Swap margin side */
+}
+
+body.rtl .radio-label input[type="radio"] {
+    margin-right: 0;
+    margin-left: 8px; /* Swap margin side */
+}
+
+body.rtl .checkbox-label input[type="checkbox"] {
+    margin-right: 0;
+    margin-left: 10px;
+}
+
+body.rtl .reminder-badge {
+    margin-left: 0;
+    margin-right: 10px;
 }

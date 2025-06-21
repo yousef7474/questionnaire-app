@@ -9,110 +9,118 @@
 <body>
     <!-- Login Screen -->
     <div id="loginScreen" class="login-container">
-        <h2 style="text-align: center; margin-bottom: 30px;">Employee Questionnaire System</h2>
+        <img src="assets/logo.png" alt="Company Logo" style="max-width: 150px; display: block; margin: 0 auto 20px;">
+        <h2 data-translate="app_title" style="text-align: center; margin-bottom: 30px;">Employee Questionnaire System</h2>
         <form id="loginForm">
-            <input type="text" id="username" placeholder="Username" required>
-            <input type="password" id="password" placeholder="Password" required>
+            <input type="text" id="username" data-translate-placeholder="username_placeholder" placeholder="Username" required>
+            <input type="password" id="password" data-translate-placeholder="password_placeholder" placeholder="Password" required>
             <select id="userRole" required>
-                <option value="">Select Role</option>
-                <option value="admin">Manager/Admin</option>
-                <option value="employee">Employee</option>
+                <option value="" data-translate="select_role">Select Role</option>
+                <option value="admin" data-translate="role_admin">Manager/Admin</option>
+                <option value="employee" data-translate="role_employee">Employee</option>
             </select>
-            <button type="submit" style="width: 100%;">Login</button>
+            <button type="submit" style="width: 100%;" data-translate="login_btn">Login</button>
         </form>
         <p style="margin-top: 20px; text-align: center;">
-            <a href="#" onclick="showRegister()" style="color: #667eea;">Register as new employee</a>
+            <a href="#" onclick="showRegister()" style="color: #667eea;" data-translate="register_link">Register as new employee</a>
         </p>
-        <p style="margin-top: 10px; text-align: center; color: #666;">
+        <p data-translate="demo_note" style="margin-top: 10px; text-align: center; color: #666;">
             Demo: Use any username/password
         </p>
     </div>
 
     <!-- Registration Screen -->
     <div id="registerScreen" class="register-container hidden">
-        <h2 style="text-align: center; margin-bottom: 30px;">Employee Registration</h2>
+        <h2 data-translate="employee_registration_title" style="text-align: center; margin-bottom: 30px;">Employee Registration</h2>
         <form id="registerForm">
-            <input type="text" id="regUsername" placeholder="Username" required>
-            <input type="password" id="regPassword" placeholder="Password" required>
-            <input type="text" id="regFullName" placeholder="Full Name" required>
-            <input type="email" id="regEmail" placeholder="Email Address" required>
-            <input type="tel" id="regPhone" placeholder="Phone Number" required>
-            <input type="text" id="regDepartment" placeholder="Department">
-            <button type="submit" style="width: 100%;">Register</button>
+            <input type="text" id="regUsername" data-translate-placeholder="username_placeholder" placeholder="Username" required>
+            <input type="password" id="regPassword" data-translate-placeholder="password_placeholder" placeholder="Password" required>
+            <input type="text" id="regFullName" data-translate-placeholder="full_name_placeholder" placeholder="Full Name" required>
+            <input type="email" id="regEmail" data-translate-placeholder="email_placeholder" placeholder="Email Address" required>
+            <input type="tel" id="regPhone" data-translate-placeholder="phone_placeholder" placeholder="Phone Number" required>
+            <input type="text" id="regDepartment" data-translate-placeholder="department_placeholder" placeholder="Department">
+            <button type="submit" style="width: 100%;" data-translate="register_btn">Register</button>
         </form>
         <p style="margin-top: 20px; text-align: center;">
-            <a href="#" onclick="showLogin()" style="color: #667eea;">Back to login</a>
+            <a href="#" onclick="showLogin()" style="color: #667eea;" data-translate="back_to_login_link">Back to login</a>
         </p>
     </div>
+
     <!-- Admin Dashboard -->
     <div id="adminDashboard" class="container hidden">
         <div class="app-header">
-            <h1>Manager Dashboard</h1>
+            <div class="logo-title">
+                <img src="assets/logo.png" alt="Company Logo">
+                <h1 data-translate="admin_dashboard_title">Manager Dashboard</h1>
+            </div>
             <div>
                 <span id="adminUsername" style="margin-right: 20px;"></span>
-                <button onclick="logout()">Logout</button>
+                <button class="lang-btn" onclick="setLanguage('en')">EN</button>
+                <button class="lang-btn" onclick="setLanguage('ar')">AR</button>
+                <button id="themeToggle" class="info-btn" style="padding: 8px 12px; margin-right: 10px;">☀️</button>
+                <button onclick="logout()" data-translate="logout_btn">Logout</button>
             </div>
         </div>
 
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-number" id="totalQuestions">0</div>
-                <div class="stat-label">Total Questions</div>
+                <div class="stat-label" data-translate="stat_total_questions">Total Questions</div>
             </div>
             <div class="stat-card">
                 <div class="stat-number" id="totalResponses">0</div>
-                <div class="stat-label">Total Responses</div>
+                <div class="stat-label" data-translate="stat_total_responses">Total Responses</div>
             </div>
             <div class="stat-card">
                 <div class="stat-number" id="totalEmployees">0</div>
-                <div class="stat-label">Registered Employees</div>
+                <div class="stat-label" data-translate="stat_total_employees">Registered Employees</div>
             </div>
             <div class="stat-card">
                 <div class="stat-number" id="pendingResponses">0</div>
-                <div class="stat-label">Pending Responses</div>
+                <div class="stat-label" data-translate="stat_pending_responses">Pending Responses</div>
             </div>
         </div>
 
         <div class="tab-container">
-            <div class="tab active" onclick="showAdminTab('create')">Create Questions</div>
-            <div class="tab" onclick="showAdminTab('manage')">Manage Questions</div>
-            <div class="tab" onclick="showAdminTab('responses')">View Responses</div>
-            <div class="tab" onclick="showAdminTab('employees')">Manage Employees</div>
-            <div class="tab" onclick="showAdminTab('reminders')">Reminders</div>
+            <div class="tab active" onclick="showAdminTab('create')" data-translate="tab_create_questions">Create Questions</div>
+            <div class="tab" onclick="showAdminTab('manage')" data-translate="tab_manage_questions">Manage Questions</div>
+            <div class="tab" onclick="showAdminTab('responses')" data-translate="tab_view_responses">View Responses</div>
+            <div class="tab" onclick="showAdminTab('employees')" data-translate="tab_manage_employees">Manage Employees</div>
+            <div class="tab" onclick="showAdminTab('reminders')" data-translate="tab_reminders">Reminders</div>
         </div>
 
         <!-- Create Questions Tab -->
         <div id="createTab" class="tab-content">
             <div class="question-card">
-                <h3>Create New Question</h3>
+                <h3 data-translate="create_new_question_title">Create New Question</h3>
                 <form id="questionForm">
-                    <label>Question Title:</label>
-                    <input type="text" id="questionTitle" placeholder="Enter your question" required>
+                    <label data-translate="label_question_title">Question Title:</label>
+                    <input type="text" id="questionTitle" data-translate-placeholder="question_title_placeholder" placeholder="Enter your question" required>
                     
-                    <label>Release Date & Time:</label>
+                    <label data-translate="label_release_time">Release Date & Time:</label>
                     <input type="datetime-local" id="releaseTime" required>
                     
-                    <label>Expiry Date & Time (Optional):</label>
+                    <label data-translate="label_expiry_time">Expiry Date & Time (Optional):</label>
                     <input type="datetime-local" id="expiryTime">
                     
-                    <label>Target Employees:</label>
+                    <label data-translate="label_target_employees">Target Employees:</label>
                     <select id="targetEmployees" multiple style="height: 100px;">
-                        <option value="all">All Employees</option>
+                        <option value="all" data-translate="option_all_employees">All Employees</option>
                     </select>
                     
                     <div class="notification-settings">
-                        <h4>Notification Settings</h4>
+                        <h4 data-translate="notification_settings_title">Notification Settings</h4>
                         <label class="checkbox-label">
                             <input type="checkbox" id="sendEmailNotification" checked>
-                            Send email notification when question is released
+                            <span data-translate="checkbox_email_notification">Send email notification when question is released</span>
                         </label>
                         <label class="checkbox-label">
                             <input type="checkbox" id="sendReminder" checked>
-                            Send reminder 24 hours before expiry
+                            <span data-translate="checkbox_expiry_reminder">Send reminder 24 hours before expiry</span>
                         </label>
                     </div>
                     
-                    <button type="submit" class="secondary-btn">Create Question</button>
+                    <button type="submit" class="secondary-btn" data-translate="create_question_btn">Create Question</button>
                 </form>
             </div>
         </div>
@@ -120,8 +128,8 @@
         <!-- Manage Questions Tab -->
         <div id="manageTab" class="tab-content hidden">
             <div class="export-section">
-                <h3>Manage Questions</h3>
-                <button class="info-btn" onclick="exportQuestionsToExcel()">Export to Excel</button>
+                <h3 data-translate="manage_questions_title">Manage Questions</h3>
+                <button class="info-btn" onclick="exportQuestionsToExcel()" data-translate="export_excel_btn">Export to Excel</button>
             </div>
             <div id="questionsList"></div>
         </div>
@@ -129,8 +137,8 @@
         <!-- View Responses Tab -->
         <div id="responsesTab" class="tab-content hidden">
             <div class="export-section">
-                <h3>Employee Responses</h3>
-                <button class="info-btn" onclick="exportResponsesToExcel()">Export All Responses to Excel</button>
+                <h3 data-translate="employee_responses_title">Employee Responses</h3>
+                <button class="info-btn" onclick="exportResponsesToExcel()" data-translate="export_all_responses_btn">Export All Responses to Excel</button>
             </div>
             <div id="responsesList"></div>
         </div>
@@ -138,8 +146,8 @@
         <!-- Manage Employees Tab -->
         <div id="employeesTab" class="tab-content hidden">
             <div class="export-section">
-                <h3>Registered Employees</h3>
-                <button class="info-btn" onclick="exportEmployeesToExcel()">Export to Excel</button>
+                <h3 data-translate="registered_employees_title">Registered Employees</h3>
+                <button class="info-btn" onclick="exportEmployeesToExcel()" data-translate="export_excel_btn">Export to Excel</button>
             </div>
             <div id="employeesList"></div>
         </div>
@@ -147,21 +155,21 @@
         <!-- Reminders Tab -->
         <div id="remindersTab" class="tab-content hidden">
             <div class="question-card">
-                <h3>Reminder Settings</h3>
-                <p>Configure automatic reminders for employees</p>
+                <h3 data-translate="reminder_settings_title">Reminder Settings</h3>
+                <p data-translate="reminder_settings_desc">Configure automatic reminders for employees</p>
                 <div class="notification-settings">
                     <label class="checkbox-label">
                         <input type="checkbox" id="globalReminders" checked>
-                        Enable automatic reminders for all questions
+                        <span data-translate="checkbox_enable_reminders">Enable automatic reminders for all questions</span>
                     </label>
-                    <label>Reminder Schedule:</label>
+                    <label data-translate="label_reminder_schedule">Reminder Schedule:</label>
                     <select id="reminderSchedule">
-                        <option value="24">24 hours before expiry</option>
-                        <option value="48">48 hours before expiry</option>
-                        <option value="72">72 hours before expiry</option>
+                        <option value="24" data-translate="option_24_hours">24 hours before expiry</option>
+                        <option value="48" data-translate="option_48_hours">48 hours before expiry</option>
+                        <option value="72" data-translate="option_72_hours">72 hours before expiry</option>
                     </select>
                 </div>
-                <button class="secondary-btn" onclick="saveReminderSettings()">Save Settings</button>
+                <button class="secondary-btn" onclick="saveReminderSettings()" data-translate="save_settings_btn">Save Settings</button>
             </div>
             <div id="remindersList"></div>
         </div>
@@ -169,21 +177,27 @@
     <!-- Employee Dashboard -->
     <div id="employeeDashboard" class="container hidden">
         <div class="app-header">
-            <h1>Employee Dashboard</h1>
+            <div class="logo-title">
+                <img src="assets/logo.png" alt="Company Logo">
+                <h1 data-translate="employee_dashboard_title">Employee Dashboard</h1>
+            </div>
             <div>
                 <span id="employeeUsername" style="margin-right: 20px;"></span>
-                <button class="info-btn" onclick="showEmployeeProfile()">My Profile</button>
-                <button onclick="logout()">Logout</button>
+                <button class="lang-btn" onclick="setLanguage('en')">EN</button>
+                <button class="lang-btn" onclick="setLanguage('ar')">AR</button>
+                <button id="employeeThemeToggle" class="info-btn" style="padding: 8px 12px; margin-right: 10px;">☀️</button>
+                <button class="info-btn" onclick="showEmployeeProfile()" data-translate="my_profile_btn">My Profile</button>
+                <button onclick="logout()" data-translate="logout_btn">Logout</button>
             </div>
         </div>
 
         <div id="employeeProfile" class="question-card hidden">
-            <h3>My Profile</h3>
+            <h3 data-translate="my_profile_btn">My Profile</h3>
             <div id="profileInfo"></div>
-            <button class="secondary-btn" onclick="editProfile()">Edit Profile</button>
+            <button class="secondary-btn" onclick="editProfile()" data-translate="edit_profile_btn">Edit Profile</button>
         </div>
 
-        <h2 style="color: white; margin-bottom: 20px;">Your Questions</h2>
+        <h2 data-translate="your_questions_title" style="color: white; margin-bottom: 20px;">Your Questions</h2>
         <div id="employeeQuestions"></div>
     </div>
 
