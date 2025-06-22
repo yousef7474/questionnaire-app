@@ -44,8 +44,15 @@ const EmployeeSchema = new mongoose.Schema({
 });
 const Employee = mongoose.model('Employee', EmployeeSchema);
 
+// --- UPDATED QuestionSchema ---
 const QuestionSchema = new mongoose.Schema({
     title: { type: String, required: true },
+    // --- NEW FIELDS ---
+    standard: { type: String },       // المعيار
+    indicatorNumber: { type: String }, // رقم المؤشر
+    practiceNumber: { type: String },  // رقم الممارسة
+    questionNumber: { type: String },  // رقم السؤال
+    // --- END NEW FIELDS ---
     releaseTime: { type: Date, required: true },
     expiryTime: { type: Date },
     targetEmployees: [String],
@@ -68,14 +75,12 @@ const Response = mongoose.model('Response', ResponseSchema);
 // --- API ROUTES ---
 // =================================================================
 
-// --- NEW: Route to get public Cloudinary configuration ---
 app.get('/api/config/cloudinary', (req, res) => {
     res.json({
         cloudName: process.env.CLOUDINARY_CLOUD_NAME,
         uploadPreset: process.env.CLOUDINARY_UPLOAD_PRESET
     });
 });
-
 
 // --- Employees API ---
 app.get('/api/employees', async (req, res) => {

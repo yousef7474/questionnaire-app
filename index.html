@@ -97,7 +97,28 @@
                     <label data-translate="label_question_title">Question Title:</label>
                     <input type="text" id="questionTitle" data-translate-placeholder="question_title_placeholder" placeholder="Enter your question" required>
                     
-                    <label data-translate="label_release_time">Release Date & Time:</label>
+                    <!-- ===== NEW FIELDS START ===== -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
+                        <div>
+                            <label>المعيار (Standard):</label>
+                            <input type="text" id="standard" placeholder="e.g., 2.1">
+                        </div>
+                        <div>
+                            <label>رقم المؤشر (Indicator No.):</label>
+                            <input type="text" id="indicatorNumber" placeholder="e.g., 2.1.1">
+                        </div>
+                        <div>
+                            <label>رقم الممارسة (Practice No.):</label>
+                            <input type="text" id="practiceNumber" placeholder="e.g., 2.1.1.1">
+                        </div>
+                        <div>
+                            <label>رقم السؤال (Question No.):</label>
+                            <input type="text" id="questionNumber" placeholder="e.g., 1">
+                        </div>
+                    </div>
+                    <!-- ===== NEW FIELDS END ===== -->
+                    
+                    <label data-translate="label_release_time" style="margin-top: 15px; display: block;">Release Date & Time:</label>
                     <input type="datetime-local" id="releaseTime" required>
                     
                     <label data-translate="label_expiry_time">Expiry Date & Time (Optional):</label>

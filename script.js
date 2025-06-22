@@ -142,9 +142,7 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
         }
 
         currentUser = await res.json();
-        // Save user session to localStorage
         localStorage.setItem('currentUser', JSON.stringify(currentUser));
-        
         await fetchAllData();
         
         document.getElementById('loginScreen').classList.add('hidden');
@@ -275,7 +273,28 @@ function loadQuestions() {
         const targetCount = q.targetEmployees.includes('all') ? employees.length : q.targetEmployees.length;
         const card = document.createElement('div');
         card.className = 'question-card';
-        card.innerHTML = `<h3>${q.title}</h3><p><strong>Release:</strong> ${new Date(q.releaseTime).toLocaleString()}</p>${q.expiryTime ? `<p><strong>Expiry:</strong> ${new Date(q.expiryTime).toLocaleString()}</p>` : ''}<p><strong>Target:</strong> ${q.targetEmployees.join(', ')}</p><p><strong>Responses:</strong> ${responseCount} / ${targetCount}</p><p><strong>Status:</strong> <span class="status-badge ${statusClass}">${status}</span></p><div style="margin-top: 15px;"><button class="danger-btn" onclick="deleteQuestion('${q._id}')">Delete</button></div>`;
+        card.innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <h3>${q.title}</h3>
+                <span class="status-badge ${statusClass}">${status}</span>
+            </div>
+            
+            <div style="display: flex; flex-wrap: wrap; gap: 15px; font-size: 14px; color: var(--text-secondary); margin: 10px 0;">
+                ${q.standard ? `<span><strong>المعيار:</strong> ${q.standard}</span>` : ''}
+                ${q.indicatorNumber ? `<span><strong>المؤشر:</strong> ${q.indicatorNumber}</span>` : ''}
+                ${q.practiceNumber ? `<span><strong>الممارسة:</strong> ${q.practiceNumber}</span>` : ''}
+                ${q.questionNumber ? `<span><strong>السؤال:</strong> ${q.questionNumber}</span>` : ''}
+            </div>
+
+            <p><strong>Release:</strong> ${new Date(q.releaseTime).toLocaleString()}</p>
+            ${q.expiryTime ? `<p><strong>Expiry:</strong> ${new Date(q.expiryTime).toLocaleString()}</p>` : ''}
+            <p><strong>Target:</strong> ${q.targetEmployees.join(', ')}</p>
+            <p><strong>Responses:</strong> ${responseCount} / ${targetCount}</p>
+            <div style="margin-top: 15px; display: flex; gap: 10px;">
+                <button class="secondary-btn" onclick="reassignQuestion('${q._id}')">Re-assign</button>
+                <button class="danger-btn" onclick="deleteQuestion('${q._id}')">Delete</button>
+            </div>
+        `;
         questionsList.appendChild(card);
     });
 }
@@ -351,6 +370,7 @@ function loadEmployeeQuestions() {
     setLanguage(localStorage.getItem('language') || 'en');
 }
 
+
 // =================================================================
 // --- Actions (Functions that send data TO the server) ---
 // =================================================================
@@ -359,6 +379,10 @@ document.getElementById('questionForm').addEventListener('submit', async functio
     e.preventDefault();
     const questionData = {
         title: document.getElementById('questionTitle').value,
+        standard: document.getElementById('standard').value,
+        indicatorNumber: document.getElementById('indicatorNumber').value,
+        practiceNumber: document.getElementById('practiceNumber').value,
+        questionNumber: document.getElementById('questionNumber').value,
         releaseTime: new Date(document.getElementById('releaseTime').value),
         expiryTime: document.getElementById('expiryTime').value ? new Date(document.getElementById('expiryTime').value) : null,
         targetEmployees: Array.from(document.getElementById('targetEmployees').selectedOptions).map(option => option.value),
@@ -494,6 +518,30 @@ async function editEmployee(id, currentDepartment) {
         alert(`Error: ${error.message}`);
     }
 }
+
+function reassignQuestion(questionId) {
+    const questionToReassign = questions.find(q => q._id === questionId);
+    if (!questionToReassign) {
+        alert('Error: Question not found.');
+        return;
+    }
+    showAdminTab('create');
+    document.getElementById('questionTitle').value = questionToReassign.title;
+    document.getElementById('standard').value = questionToReassign.standard || '';
+    document.getElementById('indicatorNumber').value = questionToReassign.indicatorNumber || '';
+    document.getElementById('practiceNumber').value = questionToReassign.practiceNumber || '';
+    document.getElementById('questionNumber').value = questionToReassign.questionNumber || '';
+    document.getElementById('releaseTime').value = '';
+    document.getElementById('expiryTime').value = '';
+    const targetSelect = document.getElementById('targetEmployees');
+    Array.from(targetSelect.options).forEach(option => {
+        option.selected = questionToReassign.targetEmployees.includes(option.value);
+    });
+    window.scrollTo(0, 0);
+    document.getElementById('questionTitle').focus();
+    alert('Question data has been pre-filled. Please set a new release and expiry date to re-assign.');
+}
+
 
 // =================================================================
 // --- Helper & Utility Functions ---
