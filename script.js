@@ -407,56 +407,91 @@ document.getElementById('questionForm').addEventListener('submit', async functio
 
 async function submitResponse(event, questionId) {
     event.preventDefault();
+
     const form = event.target;
     const submitButton = form.querySelector('button[type="submit"]');
     const originalButtonText = submitButton.textContent;
+
     try {
+        // Disable the button to prevent multiple submissions
         submitButton.disabled = true;
         submitButton.textContent = 'Submitting...';
+
         const answer = document.querySelector(`input[name="answer_${questionId}"]:checked`).value;
         const fileInput = document.getElementById(`attachment_${questionId}`);
         const urlInput = document.getElementById(`url_${questionId}`);
-        let attachmentUrl = urlInput.value.trim();
+        
+        let attachmentUrl = urlInput.value.trim(); // Default to the URL input
+
+        // --- NEW: UPLOAD LOGIC ---
+        // If a file is selected, upload it to Cloudinary and prioritize it over the URL input
         if (fileInput.files.length > 0) {
             submitButton.textContent = 'Uploading file...';
+            
             const file = fileInput.files[0];
             const config = await getCloudinaryConfig();
+            
             if (!config || !config.cloudName || !config.uploadPreset) {
                 throw new Error("Cloudinary configuration is missing. Cannot upload file.");
             }
+
             const formData = new FormData();
             formData.append('file', file);
             formData.append('upload_preset', config.uploadPreset);
-            const cloudinaryRes = await fetch(`https://api.cloudinary.com/v1_1/${config.cloudName}/upload`, {
+
+            // --- THIS IS THE KEY CHANGE ---
+            // Check if the file type starts with 'image'. If not, we tell Cloudinary it's a 'raw' file.
+            if (!file.type.startsWith('image/')) {
+                formData.append('resource_type', 'raw');
+            }
+            // Determine the correct upload endpoint based on the file type
+            const resourceType = file.type.startsWith('image/') ? 'image' : 'raw';
+            const cloudinaryUploadUrl = `https://api.cloudinary.com/v1_1/${config.cloudName}/${resourceType}/upload`;
+            // --- END OF KEY CHANGE ---
+
+
+            // Send the file directly to the correct Cloudinary API endpoint
+            const cloudinaryRes = await fetch(cloudinaryUploadUrl, {
                 method: 'POST',
                 body: formData,
             });
+
             if (!cloudinaryRes.ok) {
                 console.error('Cloudinary upload error:', await cloudinaryRes.text());
                 throw new Error('File upload failed.');
             }
+
             const cloudinaryData = await cloudinaryRes.json();
-            attachmentUrl = cloudinaryData.secure_url;
+            attachmentUrl = cloudinaryData.secure_url; // Get the permanent, secure URL from Cloudinary
         }
+        // --- END OF UPLOAD LOGIC ---
+
         submitButton.textContent = 'Saving response...';
+
         const responseData = {
             questionId: questionId,
             employeeUsername: currentUser.username,
             employeeFullName: currentUser.fullName,
             answer: answer,
-            attachmentUrl: attachmentUrl,
+            attachmentUrl: attachmentUrl, // This is now either the pasted URL or the correct Cloudinary URL
         };
+        
         const res = await fetch(`${API_URL}/responses`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(responseData)
         });
+
         if (!res.ok) throw new Error('Failed to submit response to our server.');
+
+        // Update local data and UI
         responses.push(await res.json());
         alert('Response submitted successfully!');
         renderEmployeeDashboard();
+
     } catch (error) {
         alert(`Error: ${error.message}`);
+        // Re-enable the button on failure so the user can try again
         submitButton.disabled = false;
         submitButton.textContent = originalButtonText;
     }
