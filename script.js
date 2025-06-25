@@ -438,26 +438,39 @@ async function submitResponse(event, questionId) {
             formData.append('file', file);
             formData.append('upload_preset', config.uploadPreset);
 
-            // Determine the resource type and correct upload URL
-            const resourceType = file.type.startsWith('image/') ? 'image' : 'raw';
-            if (resourceType === 'raw') {
+            // Determine the resource type based on file type
+            let resourceType = 'auto'; // Let Cloudinary determine automatically
+            let uploadUrl = `https://api.cloudinary.com/v1_1/${config.cloudName}/auto/upload`;
+
+            // For non-image files, explicitly use 'raw' resource type
+            if (!file.type.startsWith('image/')) {
+                resourceType = 'raw';
+                uploadUrl = `https://api.cloudinary.com/v1_1/${config.cloudName}/raw/upload`;
                 formData.append('resource_type', 'raw');
             }
-            const cloudinaryUploadUrl = `https://api.cloudinary.com/v1_1/${config.cloudName}/${resourceType}/upload`;
 
-            // Send the file directly to the correct Cloudinary API endpoint
-            const cloudinaryRes = await fetch(cloudinaryUploadUrl, {
+            console.log(`Uploading ${file.name} (${file.type}) as ${resourceType} to ${uploadUrl}`);
+
+            // Send the file to Cloudinary
+            const cloudinaryRes = await fetch(uploadUrl, {
                 method: 'POST',
                 body: formData,
             });
 
             if (!cloudinaryRes.ok) {
-                console.error('Cloudinary upload error:', await cloudinaryRes.text());
-                throw new Error('File upload failed.');
+                const errorText = await cloudinaryRes.text();
+                console.error('Cloudinary upload error:', errorText);
+                throw new Error(`File upload failed: ${cloudinaryRes.status} ${cloudinaryRes.statusText}`);
             }
 
             const cloudinaryData = await cloudinaryRes.json();
-            attachmentUrl = cloudinaryData.secure_url; 
+            console.log('Cloudinary response:', cloudinaryData);
+            
+            // Use the secure_url directly without any modifications
+            attachmentUrl = cloudinaryData.secure_url;
+            
+            // Verify the URL is accessible
+            console.log('Generated attachment URL:', attachmentUrl);
         }
 
         submitButton.textContent = 'Saving response...';
@@ -484,6 +497,7 @@ async function submitResponse(event, questionId) {
         renderEmployeeDashboard();
 
     } catch (error) {
+        console.error('Upload error:', error);
         alert(`Error: ${error.message}`);
         // Re-enable the button on failure so the user can try again
         submitButton.disabled = false;
