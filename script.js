@@ -423,7 +423,6 @@ async function submitResponse(event, questionId) {
         
         let attachmentUrl = urlInput.value.trim(); // Default to the URL input
 
-        // --- NEW: UPLOAD LOGIC ---
         // If a file is selected, upload it to Cloudinary and prioritize it over the URL input
         if (fileInput.files.length > 0) {
             submitButton.textContent = 'Uploading file...';
@@ -439,16 +438,12 @@ async function submitResponse(event, questionId) {
             formData.append('file', file);
             formData.append('upload_preset', config.uploadPreset);
 
-            // --- THIS IS THE KEY CHANGE ---
-            // Check if the file type starts with 'image'. If not, we tell Cloudinary it's a 'raw' file.
-            if (!file.type.startsWith('image/')) {
+            // Determine the resource type and correct upload URL
+            const resourceType = file.type.startsWith('image/') ? 'image' : 'raw';
+            if (resourceType === 'raw') {
                 formData.append('resource_type', 'raw');
             }
-            // Determine the correct upload endpoint based on the file type
-            const resourceType = file.type.startsWith('image/') ? 'image' : 'raw';
             const cloudinaryUploadUrl = `https://api.cloudinary.com/v1_1/${config.cloudName}/${resourceType}/upload`;
-            // --- END OF KEY CHANGE ---
-
 
             // Send the file directly to the correct Cloudinary API endpoint
             const cloudinaryRes = await fetch(cloudinaryUploadUrl, {
@@ -462,9 +457,20 @@ async function submitResponse(event, questionId) {
             }
 
             const cloudinaryData = await cloudinaryRes.json();
-            attachmentUrl = cloudinaryData.secure_url; // Get the permanent, secure URL from Cloudinary
+            let finalUrl = cloudinaryData.secure_url;
+
+            // --- THIS IS THE FIX ---
+            // Add the 'fl_attachment' flag to force download for non-image (raw) files
+            if (cloudinaryData.resource_type === 'raw') {
+                const urlParts = finalUrl.split('/upload/');
+                if (urlParts.length === 2) {
+                    finalUrl = `${urlParts[0]}/upload/fl_attachment/${urlParts[1]}`;
+                }
+            }
+            // --- END OF FIX ---
+
+            attachmentUrl = finalUrl; // Use the final, possibly modified, URL
         }
-        // --- END OF UPLOAD LOGIC ---
 
         submitButton.textContent = 'Saving response...';
 
@@ -473,7 +479,7 @@ async function submitResponse(event, questionId) {
             employeeUsername: currentUser.username,
             employeeFullName: currentUser.fullName,
             answer: answer,
-            attachmentUrl: attachmentUrl, // This is now either the pasted URL or the correct Cloudinary URL
+            attachmentUrl: attachmentUrl,
         };
         
         const res = await fetch(`${API_URL}/responses`, {
