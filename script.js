@@ -413,7 +413,6 @@ async function submitResponse(event, questionId) {
     const originalButtonText = submitButton.textContent;
 
     try {
-        // Disable the button to prevent multiple submissions
         submitButton.disabled = true;
         submitButton.textContent = 'Submitting...';
 
@@ -421,9 +420,8 @@ async function submitResponse(event, questionId) {
         const fileInput = document.getElementById(`attachment_${questionId}`);
         const urlInput = document.getElementById(`url_${questionId}`);
         
-        let attachmentUrl = urlInput.value.trim(); // Default to the URL input
+        let attachmentUrl = urlInput.value.trim();
 
-        // If a file is selected, upload it to Cloudinary and prioritize it over the URL input
         if (fileInput.files.length > 0) {
             submitButton.textContent = 'Uploading file...';
             
@@ -438,20 +436,17 @@ async function submitResponse(event, questionId) {
             formData.append('file', file);
             formData.append('upload_preset', config.uploadPreset);
 
-            // Determine the resource type based on file type
-            let resourceType = 'auto'; // Let Cloudinary determine automatically
-            let uploadUrl = `https://api.cloudinary.com/v1_1/${config.cloudName}/auto/upload`;
-
-            // For non-image files, explicitly use 'raw' resource type
+            // For PDFs and other documents, use raw resource type
+            let uploadUrl = `https://api.cloudinary.com/v1_1/${config.cloudName}/raw/upload`;
+            
             if (!file.type.startsWith('image/')) {
-                resourceType = 'raw';
-                uploadUrl = `https://api.cloudinary.com/v1_1/${config.cloudName}/raw/upload`;
                 formData.append('resource_type', 'raw');
+                // Add flags for better PDF handling
+                formData.append('flags', 'attachment');
             }
 
-            console.log(`Uploading ${file.name} (${file.type}) as ${resourceType} to ${uploadUrl}`);
+            console.log(`Uploading ${file.name} (${file.type}) to ${uploadUrl}`);
 
-            // Send the file to Cloudinary
             const cloudinaryRes = await fetch(uploadUrl, {
                 method: 'POST',
                 body: formData,
@@ -460,17 +455,26 @@ async function submitResponse(event, questionId) {
             if (!cloudinaryRes.ok) {
                 const errorText = await cloudinaryRes.text();
                 console.error('Cloudinary upload error:', errorText);
-                throw new Error(`File upload failed: ${cloudinaryRes.status} ${cloudinaryRes.statusText}`);
+                throw new Error(`File upload failed: ${cloudinaryRes.status}`);
             }
 
             const cloudinaryData = await cloudinaryRes.json();
             console.log('Cloudinary response:', cloudinaryData);
             
-            // Use the secure_url directly without any modifications
-            attachmentUrl = cloudinaryData.secure_url;
+            // For PDFs, modify the URL to ensure proper delivery
+            let finalUrl = cloudinaryData.secure_url;
             
-            // Verify the URL is accessible
-            console.log('Generated attachment URL:', attachmentUrl);
+            // If it's a PDF, add delivery parameters for better compatibility
+            if (file.type === 'application/pdf') {
+                // Option 1: Force download
+                finalUrl = finalUrl.replace('/upload/', '/upload/fl_attachment/');
+                
+                // Option 2: Alternative - use image delivery for PDFs (uncomment if needed)
+                // finalUrl = finalUrl.replace('/raw/upload/', '/image/upload/f_auto,fl_attachment/');
+            }
+            
+            attachmentUrl = finalUrl;
+            console.log('Final attachment URL:', attachmentUrl);
         }
 
         submitButton.textContent = 'Saving response...';
@@ -491,7 +495,6 @@ async function submitResponse(event, questionId) {
 
         if (!res.ok) throw new Error('Failed to submit response to our server.');
 
-        // Update local data and UI
         responses.push(await res.json());
         alert('Response submitted successfully!');
         renderEmployeeDashboard();
@@ -499,7 +502,6 @@ async function submitResponse(event, questionId) {
     } catch (error) {
         console.error('Upload error:', error);
         alert(`Error: ${error.message}`);
-        // Re-enable the button on failure so the user can try again
         submitButton.disabled = false;
         submitButton.textContent = originalButtonText;
     }
