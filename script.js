@@ -334,7 +334,7 @@ function loadResponses() {
             const employee = employees.find(e => e.username === r.employeeUsername);
             const card = document.createElement('div');
             card.className = 'response-card';
-            card.innerHTML = `<div class="response-header"><div><strong>${r.employeeFullName || r.employeeUsername}</strong>${employee ? `<br><small>${employee.email}</small>` : ''}</div><span style="color: var(--text-secondary);">${new Date(r.submittedAt).toLocaleString()}</span></div><p><strong>Answer:</strong> <span class="response-answer ${r.answer.toLowerCase()}">${r.answer}</span></p>${r.attachmentUrl ? `<p><strong>Attachment:</strong> <a href="${r.attachmentUrl}" class="attachment-link" target="_blank">View Attachment</a></p>` : ''}`;
+            card.innerHTML = `<div class="response-header"><div><strong>${r.employeeFullName || r.employeeUsername}</strong>${employee ? `<br><small>${employee.email}</small>` : ''}</div><span style="color: var(--text-secondary);">${new Date(r.submittedAt).toLocaleString()}</span></div><p><strong>Answer:</strong> <span class="response-answer ${r.answer.toLowerCase()}">${r.answer}</span></p>${r.attachmentUrl ? `<p><strong>Attachment:</strong> <a href="${r.attachmentUrl}" class="attachment-link" target="_blank" download>View Attachment</a></p>` : ''}`;
             questionDiv.appendChild(card);
         });
         responsesList.appendChild(questionDiv);
@@ -361,7 +361,7 @@ function loadEmployeeQuestions() {
         const card = document.createElement('div');
         card.className = 'question-card';
         if (existingResponse) {
-            card.innerHTML = `<h3>${q.title}</h3><div class="response-section"><p><strong data-translate="your_response">Your Response:</strong> <span class="response-answer ${existingResponse.answer.toLowerCase()}">${existingResponse.answer}</span></p>${existingResponse.attachmentUrl ? `<p><strong data-translate="attachment_label">Attachment:</strong> <a href="${existingResponse.attachmentUrl}" class="attachment-link" target="_blank" data-translate="view_attachment_link">View Attachment</a></p>` : ''}<p style="color: var(--text-secondary); margin-top: 10px;"><span data-translate="submitted_on">Submitted on:</span> ${new Date(existingResponse.submittedAt).toLocaleString()}</p></div>`;
+            card.innerHTML = `<h3>${q.title}</h3><div class="response-section"><p><strong data-translate="your_response">Your Response:</strong> <span class="response-answer ${existingResponse.answer.toLowerCase()}">${existingResponse.answer}</span></p>${existingResponse.attachmentUrl ? `<p><strong data-translate="attachment_label">Attachment:</strong> <a href="${existingResponse.attachmentUrl}" class="attachment-link" target="_blank" download data-translate="view_attachment_link">View Attachment</a></p>` : ''}<p style="color: var(--text-secondary); margin-top: 10px;"><span data-translate="submitted_on">Submitted on:</span> ${new Date(existingResponse.submittedAt).toLocaleString()}</p></div>`;
         } else {
             card.innerHTML = `<h3>${q.title}</h3><form onsubmit="submitResponse(event, '${q._id}')"><div class="radio-group"><label class="radio-label"><input type="radio" name="answer_${q._id}" value="Yes" required><span data-translate="yes_option">Yes</span></label><label class="radio-label"><input type="radio" name="answer_${q._id}" value="No" required><span data-translate="no_option">No</span></label></div><div class="attachment-section"><label data-translate="attachment_label_optional">Attachment (Optional):</label><input type="file" id="attachment_${q._id}" accept="image/*,.pdf,.doc,.docx"><input type="url" id="url_${q._id}" data-translate-placeholder="paste_url_placeholder" placeholder="Or paste a URL"></div><button type="submit" class="secondary-btn" data-translate="submit_response_btn">Submit Response</button></form>`;
         }
@@ -457,19 +457,7 @@ async function submitResponse(event, questionId) {
             }
 
             const cloudinaryData = await cloudinaryRes.json();
-            let finalUrl = cloudinaryData.secure_url;
-
-            // --- THIS IS THE FIX ---
-            // Add the 'fl_attachment' flag to force download for non-image (raw) files
-            if (cloudinaryData.resource_type === 'raw') {
-                const urlParts = finalUrl.split('/upload/');
-                if (urlParts.length === 2) {
-                    finalUrl = `${urlParts[0]}/upload/fl_attachment/${urlParts[1]}`;
-                }
-            }
-            // --- END OF FIX ---
-
-            attachmentUrl = finalUrl; // Use the final, possibly modified, URL
+            attachmentUrl = cloudinaryData.secure_url; 
         }
 
         submitButton.textContent = 'Saving response...';
