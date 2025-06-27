@@ -91,14 +91,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // THE FIX: Add Escape key listener to close modal
     document.addEventListener('keydown', (event) => {
-        if (event.key === 'Escape' || event.key === 'Esc') {
-            const modal = document.getElementById('reassignModal');
-            // Check if the modal is currently visible before trying to close it
-            if (!modal.classList.contains('hidden')) {
-                closeReassignModal();
-            }
+    if (event.key === 'Escape' || event.key === 'Esc') {
+        const modal = document.getElementById('reassignModal');
+        // Check if the modal is currently visible before trying to close it
+        if (!modal.classList.contains('hidden')) {
+            event.preventDefault(); // Prevent default escape behavior
+            closeReassignModal();
         }
-    });
+    }
+   });
 
 
     checkLoginStatus();
@@ -738,6 +739,7 @@ function reassignSelectedModal() {
     const modal = document.getElementById('reassignModal');
     const select = document.getElementById('reassignTargetEmployees');
     
+    // Clear and populate the select
     select.innerHTML = '<option value="all">All Employees</option>';
     employees.forEach(emp => {
         const option = document.createElement('option');
@@ -748,18 +750,33 @@ function reassignSelectedModal() {
 
     document.getElementById('reassignCount').textContent = selectedIds.length;
     modal.classList.remove('hidden');
+    
+    // Focus on the first input for better UX
+    setTimeout(() => {
+        document.getElementById('reassignReleaseTime').focus();
+    }, 100);
 }
 
 function closeReassignModal() {
+    console.log('Attempting to close modal...'); // Debug log
     const modal = document.getElementById('reassignModal');
-    modal.classList.add('hidden');
-    document.getElementById('reassignForm').reset();
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.style.display = 'none'; // Force hide with inline style
+    }
     
-    // Clear any selected checkboxes to prevent the modal from reopening
+    // Reset the form
+    const form = document.getElementById('reassignForm');
+    if (form) {
+        form.reset();
+    }
+    
+    // Clear any selected checkboxes
     document.querySelectorAll('#questionsList .question-select-checkbox:checked').forEach(checkbox => {
         checkbox.checked = false;
     });
     updateBulkActionState();
+    console.log('Modal should be closed now'); // Debug log
 }
 
 async function handleReassignSubmit(e) {
