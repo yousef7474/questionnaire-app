@@ -783,133 +783,128 @@ async function deleteSelectedQuestions() {
         return;
     }
 
+    // Show progress
+    alert(`Starting deletion of ${selectedIds.length} question(s). This may take a moment...`);
+
     let successCount = 0;
-    let errorCount = 0;
-    const errors = [];
+    let failedCount = 0;
 
-    // Find the delete button and disable it
-    const deleteButton = document.querySelector('button[onclick*="deleteSelectedQuestions"]');
-    const originalText = deleteButton ? deleteButton.textContent : 'Delete Selected';
-    
-    try {
-        if (deleteButton) {
-            deleteButton.disabled = true;
+    // Process each question
+    for (let i = 0; i < selectedIds.length; i++) {
+        const questionId = selectedIds[i];
+        
+        try {
+            console.log(`Deleting question ${i + 1} of ${selectedIds.length}...`);
+            
+            const response = await fetch(`${API_URL}/questions/${questionId}`, {
+                method: 'DELETE'
+            });
+
+            if (response.ok || response.status === 204) {
+                successCount++;
+                console.log(`✅ Question ${i + 1} deleted successfully`);
+            } else {
+                failedCount++;
+                console.error(`❌ Question ${i + 1} failed: ${response.status}`);
+            }
+        } catch (error) {
+            failedCount++;
+            console.error(`❌ Question ${i + 1} error:`, error);
         }
 
-        // For single question, delete immediately
-        if (selectedIds.length === 1) {
-            if (deleteButton) deleteButton.textContent = 'Deleting...';
-            
-            try {
-                const res = await fetch(`${API_URL}/questions/${selectedIds[0]}`, { 
-                    method: 'DELETE' 
-                });
-                
-                if (res.status === 204 || res.status === 200) {
-                    successCount = 1;
-                    alert('Question deleted successfully.');
-                } else {
-                    errorCount = 1;
-                    alert('Failed to delete question.');
-                }
-            } catch (error) {
-                errorCount = 1;
-                alert(`Error deleting question: ${error.message}`);
-            }
-        } 
-        // For multiple questions, use sequential deletion with delays
-        else {
-            if (deleteButton) deleteButton.textContent = 'Preparing to delete...';
-            
-            // Add a small delay before starting
+        // Small delay between deletions
+        if (i < selectedIds.length - 1) {
             await new Promise(resolve => setTimeout(resolve, 500));
-
-            for (let i = 0; i < selectedIds.length; i++) {
-                const id = selectedIds[i];
-                
-                try {
-                    // Update progress
-                    if (deleteButton) {
-                        deleteButton.textContent = `Deleting ${i + 1} of ${selectedIds.length}...`;
-                    }
-
-                    // Make the delete request
-                    const res = await fetch(`${API_URL}/questions/${id}`, { 
-                        method: 'DELETE',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        }
-                    });
-                    
-                    if (res.status === 204 || res.status === 200) {
-                        successCount++;
-                        console.log(`Successfully deleted question ${i + 1}/${selectedIds.length}`);
-                    } else {
-                        errorCount++;
-                        const errorText = await res.text().catch(() => 'Unknown error');
-                        errors.push(`Question ${i + 1}: HTTP ${res.status} - ${errorText}`);
-                        console.error(`Failed to delete question ${i + 1}:`, res.status, errorText);
-                    }
-                } catch (error) {
-                    errorCount++;
-                    errors.push(`Question ${i + 1}: ${error.message}`);
-                    console.error(`Error deleting question ${i + 1}:`, error);
-                }
-
-                // Add delay between deletions to prevent server overload
-                if (i < selectedIds.length - 1) {
-                    await new Promise(resolve => setTimeout(resolve, 300));
-                }
-            }
-
-            // Show detailed results for multiple deletions
-            let message = '';
-            if (successCount > 0) {
-                message = `Successfully deleted ${successCount} out of ${selectedIds.length} question(s).`;
-            }
-            if (errorCount > 0) {
-                message += `\n${errorCount} failed to delete.`;
-                if (errors.length > 0 && errors.length <= 3) {
-                    message += '\n\nErrors:\n' + errors.join('\n');
-                } else if (errors.length > 3) {
-                    message += '\n\nCheck console for detailed error messages.';
-                    console.error('All delete errors:', errors);
-                }
-            }
-            
-            alert(message);
-        }
-
-    } catch (error) {
-        console.error('Bulk delete error:', error);
-        alert(`Unexpected error during deletion: ${error.message}`);
-    } finally {
-        // Always reset the button and clear selections
-        if (deleteButton) {
-            deleteButton.textContent = originalText;
-            deleteButton.disabled = false;
-        }
-
-        // Clear all checkboxes
-        selectedCheckboxes.forEach(checkbox => {
-            checkbox.checked = false;
-        });
-
-        // Update bulk action state
-        updateBulkActionState();
-
-        // Refresh data only if at least one deletion was successful
-        if (successCount > 0) {
-            if (deleteButton) deleteButton.textContent = 'Refreshing...';
-            try {
-                await fetchAllData();
-                renderAdminDashboard();
-            } catch (refreshError) {
-                console.error('Error refreshing data:', refreshError);
-            }
-            if (deleteButton) deleteButton.textContent = originalText;
         }
     }
+
+    // Clear all checkboxes
+    selectedCheckboxes.forEach(checkbox => {
+        checkbox.checked = false;
+    });
+
+    // Update UI
+    updateBulkActionState();
+
+    // Show results
+    let message = `Deletion completed!\n\nSuccessful: ${successCount}\nFailed: ${failedCount}`;
+    alert(message);
+
+    // Refresh data if any deletions were successful
+    if (successCount > 0) {
+        try {
+            await fetchAllData();
+            renderAdminDashboard();
+        } catch (error) {
+            console.error('Error refreshing data:', error);
+        }
+    }
+}async function deleteSelectedQuestionsDebug() {
+    console.log('🔍 Starting debug delete function...');
+    
+    const selectedCheckboxes = document.querySelectorAll('#questionsList .question-select-checkbox:checked');
+    console.log('📋 Selected checkboxes:', selectedCheckboxes.length);
+    
+    const selectedIds = Array.from(selectedCheckboxes).map(cb => cb.value);
+    console.log('🆔 Selected IDs:', selectedIds);
+
+    if (selectedIds.length === 0) {
+        alert('Please select at least one question to delete.');
+        return;
+    }
+
+    if (!confirm(`Are you sure you want to delete ${selectedIds.length} selected question(s)?`)) {
+        console.log('❌ User cancelled deletion');
+        return;
+    }
+
+    console.log('✅ User confirmed deletion, proceeding...');
+
+    for (let i = 0; i < selectedIds.length; i++) {
+        const questionId = selectedIds[i];
+        console.log(`🔄 Processing question ${i + 1}/${selectedIds.length}: ${questionId}`);
+        
+        try {
+            const url = `${API_URL}/questions/${questionId}`;
+            console.log('📡 Making request to:', url);
+            
+            const response = await fetch(url, {
+                method: 'DELETE'
+            });
+
+            console.log('📨 Response status:', response.status);
+            console.log('📨 Response ok:', response.ok);
+
+            if (response.ok || response.status === 204) {
+                console.log(`✅ Question ${i + 1} deleted successfully`);
+                alert(`Question ${i + 1} deleted!`);
+            } else {
+                console.log(`❌ Question ${i + 1} failed with status:`, response.status);
+                const errorText = await response.text();
+                console.log('❌ Error details:', errorText);
+                alert(`Question ${i + 1} failed: ${response.status}`);
+            }
+        } catch (error) {
+            console.error(`💥 Error with question ${i + 1}:`, error);
+            alert(`Error with question ${i + 1}: ${error.message}`);
+        }
+
+        // Wait between deletions
+        console.log('⏳ Waiting 1 second...');
+        await new Promise(resolve => setTimeout(resolve, 1000));
+    }
+
+    console.log('🏁 Deletion process completed');
+    
+    // Clear selections
+    selectedCheckboxes.forEach(cb => cb.checked = false);
+    updateBulkActionState();
+    
+    // Refresh
+    await fetchAllData();
+    renderAdminDashboard();
+    
+    console.log('🔄 Data refreshed');
 }
 // =================================================================
 // --- Helper & Utility Functions ---
