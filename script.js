@@ -86,6 +86,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Event listener for the new re-assign modal form
+    document.getElementById('reassignForm').addEventListener('submit', handleReassignSubmit);
+
     checkLoginStatus();
 });
 
@@ -293,9 +296,12 @@ function loadQuestions(filterStandard = 'all') {
         const card = document.createElement('div');
         card.className = 'question-card';
         card.innerHTML = `
-            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                <h3>${q.title}</h3>
-                <span class="status-badge ${statusClass}">${status}</span>
+            <div class="question-card-header">
+                <label class="checkbox-label" style="margin-bottom: 0; padding-right: 10px;">
+                    <input type="checkbox" class="question-select-checkbox" value="${q._id}" onchange="updateBulkActionState()">
+                </label>
+                <h3 style="flex-grow: 1;">${q.title}</h3>
+                <span class="status-badge ${statusClass}" style="flex-shrink: 0;">${status}</span>
             </div>
             ${getQuestionDetailsHtml(q)}
             <p><strong>Release:</strong> ${new Date(q.releaseTime).toLocaleString()}</p>
@@ -309,6 +315,8 @@ function loadQuestions(filterStandard = 'all') {
         `;
         questionsList.appendChild(card);
     });
+
+    updateBulkActionState(); // Reset state on load/filter
 }
 
 function loadEmployees() {
@@ -649,6 +657,144 @@ function reassignQuestion(questionId) {
     alert('Question data has been pre-filled. Please set a new release and expiry date to re-assign.');
 }
 
+// =================================================================
+// --- NEW: Bulk Action Functions ---
+// =================================================================
+
+function updateBulkActionState() {
+    const checkboxes = document.querySelectorAll('#questionsList .question-select-checkbox:checked');
+    const selectedCount = checkboxes.length;
+    const bulkActionsBar = document.getElementById('bulkActionsBar');
+    
+    if (selectedCount > 0) {
+        bulkActionsBar.classList.remove('hidden');
+        document.getElementById('selectionCount').textContent = `${selectedCount} selected`;
+    } else {
+        bulkActionsBar.classList.add('hidden');
+    }
+
+    const totalCheckboxes = document.querySelectorAll('#questionsList .question-select-checkbox').length;
+    document.getElementById('selectAllCheckbox').checked = (totalCheckboxes > 0 && selectedCount === totalCheckboxes);
+}
+
+function toggleSelectAll(checked) {
+    document.querySelectorAll('#questionsList .question-select-checkbox').forEach(checkbox => {
+        checkbox.checked = checked;
+    });
+    updateBulkActionState();
+}
+
+async function deleteSelectedQuestions() {
+    const selectedIds = Array.from(document.querySelectorAll('#questionsList .question-select-checkbox:checked')).map(cb => cb.value);
+
+    if (selectedIds.length === 0) {
+        alert('Please select at least one question to delete.');
+        return;
+    }
+
+    if (!confirm(`Are you sure you want to delete ${selectedIds.length} selected question(s) and all their associated responses? This cannot be undone.`)) {
+        return;
+    }
+
+    try {
+        const res = await fetch(`${API_URL}/questions/bulk`, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ids: selectedIds })
+        });
+        
+        if (!res.ok) {
+            const errorData = await res.json();
+            throw new Error(errorData.message || 'Failed to delete selected questions.');
+        }
+        
+        alert(`${selectedIds.length} question(s) deleted successfully.`);
+        await fetchAllData();
+        renderAdminDashboard();
+    } catch (error) {
+        alert(`Error: ${error.message}`);
+    }
+}
+
+function reassignSelectedModal() {
+    const selectedIds = Array.from(document.querySelectorAll('#questionsList .question-select-checkbox:checked')).map(cb => cb.value);
+    if (selectedIds.length === 0) {
+        alert('Please select at least one question to re-assign.');
+        return;
+    }
+
+    const modal = document.getElementById('reassignModal');
+    const select = document.getElementById('reassignTargetEmployees');
+    
+    select.innerHTML = '<option value="all">All Employees</option>';
+    employees.forEach(emp => {
+        const option = document.createElement('option');
+        option.value = emp.username;
+        option.textContent = `${emp.fullName} (${emp.department || 'No Dept'})`;
+        select.appendChild(option);
+    });
+
+    document.getElementById('reassignCount').textContent = selectedIds.length;
+    modal.classList.remove('hidden');
+}
+
+function closeReassignModal() {
+    document.getElementById('reassignModal').classList.add('hidden');
+    document.getElementById('reassignForm').reset();
+}
+
+async function handleReassignSubmit(e) {
+    e.preventDefault();
+    const selectedIds = Array.from(document.querySelectorAll('#questionsList .question-select-checkbox:checked')).map(cb => cb.value);
+    if (selectedIds.length === 0) {
+        closeReassignModal();
+        return;
+    }
+
+    const releaseTime = new Date(document.getElementById('reassignReleaseTime').value);
+    const expiryTime = document.getElementById('reassignExpiryTime').value ? new Date(document.getElementById('reassignExpiryTime').value) : null;
+    const targetEmployees = Array.from(document.getElementById('reassignTargetEmployees').selectedOptions).map(option => option.value);
+
+    const creationPromises = selectedIds.map(id => {
+        const originalQuestion = questions.find(q => q._id === id);
+        if (!originalQuestion) return Promise.resolve(null);
+
+        const newQuestionData = {
+            title: originalQuestion.title,
+            standard: originalQuestion.standard,
+            indicatorNumber: originalQuestion.indicatorNumber,
+            practiceNumber: originalQuestion.practiceNumber,
+            questionNumber: originalQuestion.questionNumber,
+            releaseTime,
+            expiryTime,
+            targetEmployees,
+            createdBy: currentUser.username,
+        };
+
+        return fetch(`${API_URL}/questions`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(newQuestionData)
+        });
+    });
+
+    try {
+        const results = await Promise.all(creationPromises);
+        const failedCount = results.filter(res => res === null || !res.ok).length;
+
+        if (failedCount > 0) {
+            alert(`Successfully re-assigned ${selectedIds.length - failedCount} question(s). ${failedCount} failed.`);
+        } else {
+            alert(`Successfully re-assigned all ${selectedIds.length} question(s).`);
+        }
+        
+        closeReassignModal();
+        await fetchAllData();
+        renderAdminDashboard();
+    } catch (error) {
+        alert(`An error occurred during re-assignment: ${error.message}`);
+    }
+}
 
 // =================================================================
 // --- Helper & Utility Functions ---
@@ -696,6 +842,9 @@ function showSubTab(tabName) {
     document.querySelectorAll('.sub-tab').forEach(t => t.classList.remove('active'));
     document.getElementById(`${tabName}SubTab`).classList.remove('hidden');
     document.querySelector(`.sub-tab[onclick="showSubTab('${tabName}')"]`).classList.add('active');
+    if(tabName === 'manage'){
+        updateBulkActionState(); // Hide bulk bar when switching to this tab
+    }
 }
 
 

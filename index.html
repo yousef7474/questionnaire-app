@@ -153,6 +153,22 @@
                         <h3 data-translate="manage_questions_title">Manage Questions</h3>
                         <button class="info-btn" onclick="exportQuestionsToExcel()" data-translate="export_excel_btn">Export to Excel</button>
                     </div>
+                    
+                    <!-- NEW: BULK ACTIONS BAR -->
+                    <div id="bulkActionsBar" class="filter-section hidden" style="justify-content: space-between; background: var(--bg-primary); border: 1px solid var(--border-color); margin-bottom: 10px;">
+                        <div>
+                            <label class="checkbox-label" style="margin-bottom: 0;">
+                                <input type="checkbox" id="selectAllCheckbox" onchange="toggleSelectAll(this.checked)">
+                                <span>Select All</span>
+                            </label>
+                            <span id="selectionCount" style="margin-left: 15px; color: var(--text-secondary);">0 selected</span>
+                        </div>
+                        <div>
+                            <button class="info-btn" onclick="reassignSelectedModal()">Re-assign Selected</button>
+                            <button class="danger-btn" onclick="deleteSelectedQuestions()">Delete Selected</button>
+                        </div>
+                    </div>
+                    
                     <div class="filter-section">
                         <label for="questionFilterStandard">تصفية حسب المعيار:</label>
                         <select id="questionFilterStandard" onchange="filterQuestions()">
@@ -279,6 +295,29 @@
         </div>
 
         <div id="employeeQuestions"></div>
+    </div>
+
+    <!-- NEW: Re-assign Modal -->
+    <div id="reassignModal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h3>Re-assign Selected Questions</h3>
+            <p>Set new details for the <span id="reassignCount"></span> selected questions. New questions will be created based on the originals.</p>
+            <form id="reassignForm">
+                <label>New Release Date & Time:</label>
+                <input type="datetime-local" id="reassignReleaseTime" required>
+                
+                <label>New Expiry Date & Time (Optional):</label>
+                <input type="datetime-local" id="reassignExpiryTime">
+                
+                <label>New Target Employees:</label>
+                <select id="reassignTargetEmployees" multiple required style="height: 100px;"></select>
+                
+                <div style="margin-top: 20px; display: flex; justify-content: flex-end; gap: 10px;">
+                    <button type="button" class="info-btn" onclick="closeReassignModal()">Cancel</button>
+                    <button type="submit" class="secondary-btn">Confirm Re-assign</button>
+                </div>
+            </form>
+        </div>
     </div>
 
     <!-- Include XLSX library for Excel export -->

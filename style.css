@@ -414,6 +414,55 @@ body.dark-theme .main-tab.active {
 .employee-filter-container label:hover span { background: rgba(255, 255, 255, 0.2); }
 .employee-filter-container input[type="radio"]:checked + span { background: white; color: #667eea; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
 
+/* --- NEW BULK ACTION & MODAL STYLES --- */
+.question-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 15px;
+}
+.question-card-header h3 {
+    flex-grow: 1;
+}
+.question-card-header .status-badge {
+    flex-shrink: 0;
+}
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    transition: opacity 0.3s ease;
+}
+.modal-content {
+    background: var(--bg-primary);
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 5px 25px rgba(0,0,0,0.3);
+    width: 90%;
+    max-width: 500px;
+}
+.modal-content h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+}
+.modal-content p {
+    margin-bottom: 20px;
+    color: var(--text-secondary);
+}
+.modal-content label {
+    display: block;
+    margin-top: 15px;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
 
 /* --- RTL STYLES FOR ARABIC --- */
 body.rtl { direction: rtl; text-align: right; }
@@ -452,5 +501,9 @@ body.rtl .question-details-grid { border-left: none; border-right: 3px solid #66
     .main-tab {
         padding: 10px 15px;
         font-size: 16px;
+    }
+    #bulkActionsBar {
+        flex-direction: column;
+        gap: 15px;
     }
 }
