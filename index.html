@@ -97,7 +97,6 @@
                     <label data-translate="label_question_title">Question Title:</label>
                     <input type="text" id="questionTitle" data-translate-placeholder="question_title_placeholder" placeholder="Enter your question" required>
                     
-                    <!-- ===== NEW FIELDS START ===== -->
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
                         <div>
                             <label>المعيار (Standard):</label>
@@ -116,7 +115,6 @@
                             <input type="text" id="questionNumber" placeholder="e.g., 1">
                         </div>
                     </div>
-                    <!-- ===== NEW FIELDS END ===== -->
                     
                     <label data-translate="label_release_time" style="margin-top: 15px; display: block;">Release Date & Time:</label>
                     <input type="datetime-local" id="releaseTime" required>
@@ -159,9 +157,10 @@
         <div id="responsesTab" class="tab-content hidden">
             <div class="export-section">
                 <h3 data-translate="employee_responses_title">Employee Responses</h3>
-                <button class="info-btn" onclick="exportResponsesToExcel()" data-translate="export_all_responses_btn">Export All Responses to Excel</button>
+                <button class="info-btn" onclick="exportAllResponsesToExcel()" data-translate="export_all_responses_btn">Export All Responses to Excel</button>
             </div>
-            <div id="responsesList"></div>
+            <!-- THIS IS THE CORRECTED LINE -->
+            <div id="responsesByEmployeeList"></div>
         </div>
 
         <!-- Manage Employees Tab -->
