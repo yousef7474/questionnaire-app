@@ -355,12 +355,15 @@ function loadQuestions(filterStandard = 'all') {
         if (expiryTime && now > expiryTime) return 'Expired';
         return 'Active';
     };
+
     const sortedQuestions = filteredQuestions.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    
     sortedQuestions.forEach(q => {
         const status = getStatus(q);
         const statusClass = status === 'Active' ? 'status-active' : status === 'Scheduled' ? 'status-scheduled' : 'status-expired';
         const responseCount = responses.filter(r => r.questionId === q._id).length;
         const targetCount = q.targetEmployees.includes('all') ? employees.length : q.targetEmployees.length;
+        
         const card = document.createElement('div');
         card.className = 'question-card';
         card.innerHTML = `
@@ -376,8 +379,16 @@ function loadQuestions(filterStandard = 'all') {
             ${q.expiryTime ? `<p><strong>Expiry:</strong> ${new Date(q.expiryTime).toLocaleString()}</p>` : ''}
             <p><strong>Target:</strong> ${q.targetEmployees.join(', ')}</p>
             <p><strong>Responses:</strong> ${responseCount} / ${targetCount}</p>
-            <div style="margin-top: 15px; display: flex; gap: 10px;">
-                <button class="danger-btn" onclick="deleteQuestion('${q._id}')">Delete</button>
+            <div style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
+                <button class="secondary-btn" onclick="reassignQuestion('${q._id}')" title="Re-assign with new settings">
+                    Re-assign
+                </button>
+                <button class="info-btn" onclick="quickReassignQuestion('${q._id}')" title="Quick re-assign with current settings">
+                    Quick Re-assign
+                </button>
+                <button class="danger-btn" onclick="deleteQuestion('${q._id}')">
+                    Delete
+                </button>
             </div>
         `;
         questionsList.appendChild(card);
@@ -695,33 +706,308 @@ async function editEmployee(id, currentDepartment) {
     }
 }
 
-function reassignQuestion(questionId) {
-    const questionToReassign = questions.find(q => q._id === questionId);
-    if (!questionToReassign) {
-        alert('Error: Question not found.');
+async function reassignQuestion(questionId) {
+    const question = questions.find(q => q._id === questionId);
+    if (!question) {
+        alert('Question not found.');
         return;
     }
-    showMainTab('governance');
-    showSubTab('create');
-    document.getElementById('questionTitle').value = questionToReassign.title;
-    document.getElementById('standard').value = questionToReassign.standard || '';
-    document.getElementById('indicatorNumber').value = questionToReassign.indicatorNumber || '';
-    document.getElementById('practiceNumber').value = questionToReassign.practiceNumber || '';
-    document.getElementById('questionNumber').value = questionToReassign.questionNumber || '';
-    document.getElementById('releaseTime').value = '';
-    document.getElementById('expiryTime').value = '';
-    const targetSelect = document.getElementById('targetEmployees');
-    Array.from(targetSelect.options).forEach(option => {
-        option.selected = questionToReassign.targetEmployees.includes(option.value);
+
+    // Show question details
+    const questionDetails = `Question: "${question.title}"
+Standard: ${question.standard || 'N/A'}
+Current Release: ${new Date(question.releaseTime).toLocaleString()}
+Current Expiry: ${question.expiryTime ? new Date(question.expiryTime).toLocaleString() : 'No expiry'}`;
+
+    if (!confirm(`Re-assign this question?\n\n${questionDetails}`)) {
+        return;
+    }
+
+    // Get new release date
+    const newReleaseDate = prompt('Enter new release date and time (YYYY-MM-DD HH:MM):', 
+        new Date().toISOString().slice(0, 16).replace('T', ' '));
+    
+    if (!newReleaseDate) {
+        alert('Re-assignment cancelled.');
+        return;
+    }
+
+    // Get new expiry date (optional)
+    const newExpiryDate = prompt('Enter new expiry date and time (optional, YYYY-MM-DD HH:MM):', '');
+
+    // Get target employees
+    const employeeOptions = ['all', ...employees.map(emp => `${emp.username} (${emp.fullName})`)];
+    const selectedEmployees = [];
+
+    let employeeSelection = '';
+    while (true) {
+        const availableOptions = employeeOptions.filter(opt => !selectedEmployees.includes(opt));
+        if (availableOptions.length === 0) break;
+
+        employeeSelection = prompt(
+            `Select target employees (current: ${selectedEmployees.length > 0 ? selectedEmployees.join(', ') : 'none'}):\n\n` +
+            availableOptions.map((opt, idx) => `${idx + 1}. ${opt}`).join('\n') + 
+            '\n\nEnter number (1-' + availableOptions.length + '), or "done" to finish:',
+            selectedEmployees.length === 0 ? '1' : 'done'
+        );
+
+        if (!employeeSelection || employeeSelection.toLowerCase() === 'done') {
+            break;
+        }
+
+        const selectedIndex = parseInt(employeeSelection) - 1;
+        if (selectedIndex >= 0 && selectedIndex < availableOptions.length) {
+            selectedEmployees.push(availableOptions[selectedIndex]);
+        } else {
+            alert('Invalid selection. Please try again.');
+        }
+    }
+
+    if (selectedEmployees.length === 0) {
+        alert('No employees selected. Re-assignment cancelled.');
+        return;
+    }
+
+    // Process selected employees
+    const targetEmployees = selectedEmployees.map(emp => {
+        if (emp === 'all') return 'all';
+        return emp.split(' (')[0]; // Extract username
     });
-    window.scrollTo(0, 0);
-    document.getElementById('questionTitle').focus();
-    alert('Question data has been pre-filled. Please set a new release and expiry date to re-assign.');
+
+    // Create new question
+    const newQuestionData = {
+        title: question.title,
+        standard: question.standard,
+        indicatorNumber: question.indicatorNumber,
+        practiceNumber: question.practiceNumber,
+        questionNumber: question.questionNumber,
+        releaseTime: new Date(newReleaseDate),
+        expiryTime: newExpiryDate ? new Date(newExpiryDate) : null,
+        targetEmployees: targetEmployees,
+        createdBy: currentUser.username,
+    };
+
+    try {
+        const response = await fetch(`${API_URL}/questions`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(newQuestionData)
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to create re-assigned question.');
+        }
+
+        const newQuestion = await response.json();
+        questions.push(newQuestion);
+        
+        alert(`Question re-assigned successfully!\nNew release: ${newReleaseDate}\nTargets: ${targetEmployees.join(', ')}`);
+        
+        await fetchAllData();
+        renderAdminDashboard();
+    } catch (error) {
+        alert(`Error re-assigning question: ${error.message}`);
+    }
 }
 
+async function reassignSelectedQuestions() {
+    const selectedCheckboxes = document.querySelectorAll('#questionsList .question-select-checkbox:checked');
+    const selectedIds = Array.from(selectedCheckboxes).map(cb => cb.value);
+
+    if (selectedIds.length === 0) {
+        alert('Please select at least one question to re-assign.');
+        return;
+    }
+
+    if (!confirm(`Re-assign ${selectedIds.length} selected question(s)?`)) {
+        return;
+    }
+
+    // Get new release date
+    const newReleaseDate = prompt('Enter new release date and time for all questions (YYYY-MM-DD HH:MM):', 
+        new Date().toISOString().slice(0, 16).replace('T', ' '));
+    
+    if (!newReleaseDate) {
+        alert('Re-assignment cancelled.');
+        return;
+    }
+
+    // Get new expiry date (optional)
+    const newExpiryDate = prompt('Enter new expiry date and time (optional, YYYY-MM-DD HH:MM):', '');
+
+    // Simple employee selection for bulk
+    const employeeChoice = prompt(
+        'Select target employees:\n' +
+        '1. All employees\n' +
+        '2. Specific employees (will prompt for each)\n\n' +
+        'Enter 1 or 2:'
+    );
+
+    let targetEmployees = [];
+
+    if (employeeChoice === '1') {
+        targetEmployees = ['all'];
+    } else if (employeeChoice === '2') {
+        // For bulk, use a simpler selection method
+        const employeeList = employees.map((emp, idx) => `${idx + 1}. ${emp.username} (${emp.fullName})`).join('\n');
+        const selectedNumbers = prompt(
+            `Select employees by numbers (comma-separated):\n\n${employeeList}\n\nExample: 1,3,5`
+        );
+
+        if (selectedNumbers) {
+            const numbers = selectedNumbers.split(',').map(n => parseInt(n.trim()) - 1);
+            targetEmployees = numbers
+                .filter(n => n >= 0 && n < employees.length)
+                .map(n => employees[n].username);
+        }
+    }
+
+    if (targetEmployees.length === 0) {
+        alert('No employees selected. Re-assignment cancelled.');
+        return;
+    }
+
+    // Process each selected question
+    let successCount = 0;
+    let failureCount = 0;
+
+    alert(`Starting re-assignment of ${selectedIds.length} questions...`);
+
+    for (let i = 0; i < selectedIds.length; i++) {
+        const questionId = selectedIds[i];
+        const originalQuestion = questions.find(q => q._id === questionId);
+        
+        if (!originalQuestion) {
+            failureCount++;
+            continue;
+        }
+
+        const newQuestionData = {
+            title: originalQuestion.title,
+            standard: originalQuestion.standard,
+            indicatorNumber: originalQuestion.indicatorNumber,
+            practiceNumber: originalQuestion.practiceNumber,
+            questionNumber: originalQuestion.questionNumber,
+            releaseTime: new Date(newReleaseDate),
+            expiryTime: newExpiryDate ? new Date(newExpiryDate) : null,
+            targetEmployees: targetEmployees,
+            createdBy: currentUser.username,
+        };
+
+        try {
+            const response = await fetch(`${API_URL}/questions`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(newQuestionData)
+            });
+
+            if (response.ok) {
+                successCount++;
+                console.log(`✅ Question ${i + 1} re-assigned successfully`);
+            } else {
+                failureCount++;
+                console.error(`❌ Question ${i + 1} failed: ${response.status}`);
+            }
+        } catch (error) {
+            failureCount++;
+            console.error(`❌ Question ${i + 1} error:`, error);
+        }
+
+        // Small delay between requests
+        if (i < selectedIds.length - 1) {
+            await new Promise(resolve => setTimeout(resolve, 300));
+        }
+    }
+
+    // Clear selections
+    selectedCheckboxes.forEach(cb => cb.checked = false);
+    updateBulkActionState();
+
+    // Show results
+    alert(`Re-assignment completed!\n\nSuccessful: ${successCount}\nFailed: ${failureCount}`);
+
+    // Refresh data
+    if (successCount > 0) {
+        await fetchAllData();
+        renderAdminDashboard();
+    }
+}
+async function quickReassignQuestion(questionId) {
+    const question = questions.find(q => q._id === questionId);
+    if (!question) {
+        alert('Question not found.');
+        return;
+    }
+
+    if (!confirm(`Quick re-assign "${question.title}" with current settings?\n\nThis will create a new question with:\n- Release: Now\n- Expiry: Same as original\n- Targets: Same as original`)) {
+        return;
+    }
+
+    const newQuestionData = {
+        title: question.title,
+        standard: question.standard,
+        indicatorNumber: question.indicatorNumber,
+        practiceNumber: question.practiceNumber,
+        questionNumber: question.questionNumber,
+        releaseTime: new Date(), // Now
+        expiryTime: question.expiryTime ? new Date(question.expiryTime) : null,
+        targetEmployees: question.targetEmployees,
+        createdBy: currentUser.username,
+    };
+
+    try {
+        const response = await fetch(`${API_URL}/questions`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(newQuestionData)
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to quick re-assign question.');
+        }
+
+        alert('Question quickly re-assigned successfully!');
+        
+        await fetchAllData();
+        renderAdminDashboard();
+    } catch (error) {
+        alert(`Error quick re-assigning question: ${error.message}`);
+    }
+}
 // =================================================================
 // --- Bulk Action Functions (Modified) ---
 // =================================================================
+
+function updateBulkActionButtons(bulkActionsBar, selectedCount) {
+    // Find or create the buttons container
+    let buttonsContainer = bulkActionsBar.querySelector('.bulk-action-buttons');
+    if (!buttonsContainer) {
+        buttonsContainer = document.createElement('div');
+        buttonsContainer.className = 'bulk-action-buttons';
+        buttonsContainer.style.display = 'flex';
+        buttonsContainer.style.gap = '10px';
+        bulkActionsBar.appendChild(buttonsContainer);
+    }
+
+    // Clear existing buttons
+    buttonsContainer.innerHTML = '';
+
+    // Add Re-assign button
+    const reassignBtn = document.createElement('button');
+    reassignBtn.className = 'info-btn';
+    reassignBtn.textContent = 'Re-assign Selected';
+    reassignBtn.onclick = reassignSelectedQuestions;
+    reassignBtn.title = `Re-assign ${selectedCount} selected questions`;
+    buttonsContainer.appendChild(reassignBtn);
+
+    // Add Delete button
+    const deleteBtn = document.createElement('button');
+    deleteBtn.className = 'danger-btn';
+    deleteBtn.textContent = 'Delete Selected';
+    deleteBtn.onclick = deleteSelectedQuestions;
+    deleteBtn.title = `Delete ${selectedCount} selected questions`;
+    buttonsContainer.appendChild(deleteBtn);
+}
 
 function updateBulkActionState() {
     try {
@@ -729,7 +1015,7 @@ function updateBulkActionState() {
         const selectedCount = checkboxes.length;
         const bulkActionsBar = document.getElementById('bulkActionsBar');
         
-        if (!bulkActionsBar) return; // Exit if element doesn't exist
+        if (!bulkActionsBar) return;
         
         if (selectedCount > 0) {
             bulkActionsBar.classList.remove('hidden');
@@ -738,11 +1024,8 @@ function updateBulkActionState() {
                 selectionCountEl.textContent = `${selectedCount} selected`;
             }
             
-            // Hide the reassign button
-            const reassignBtn = bulkActionsBar.querySelector('button[onclick*="reassignSelectedModal"]');
-            if (reassignBtn) {
-                reassignBtn.style.display = 'none';
-            }
+            // Update bulk actions buttons
+            updateBulkActionButtons(bulkActionsBar, selectedCount);
         } else {
             bulkActionsBar.classList.add('hidden');
         }
@@ -753,7 +1036,6 @@ function updateBulkActionState() {
             selectAllCheckbox.checked = (totalCheckboxes > 0 && selectedCount === totalCheckboxes);
         }
         
-        // Force hide modal
         forceHideModal();
     } catch (error) {
         console.error('Error in updateBulkActionState:', error);
