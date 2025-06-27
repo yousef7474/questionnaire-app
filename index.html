@@ -173,7 +173,6 @@
                 <h3 data-translate="employee_responses_title">Employee Responses</h3>
                 <button class="info-btn" onclick="exportAllResponsesToExcel()" data-translate="export_all_responses_btn">Export All Responses to Excel</button>
             </div>
-            <!-- NEW: Filter Section for Responses -->
             <div class="filter-section">
                 <label for="responseFilterStandard">تصفية حسب المعيار:</label>
                 <select id="responseFilterStandard" onchange="filterResponses()">
@@ -241,6 +240,23 @@
         </div>
 
         <h2 data-translate="your_questions_title" style="color: white; margin-bottom: 20px;">Your Questions</h2>
+        
+        <!-- NEW FILTER FOR EMPLOYEE DASHBOARD -->
+        <div class="employee-filter-container">
+            <label>
+                <input type="radio" name="employeeQuestionFilter" value="all" onchange="filterEmployeeQuestions()" checked>
+                <span data-translate="filter_all">All</span>
+            </label>
+            <label>
+                <input type="radio" name="employeeQuestionFilter" value="unanswered">
+                <span data-translate="filter_unanswered">Unanswered</span>
+            </label>
+            <label>
+                <input type="radio" name="employeeQuestionFilter" value="answered">
+                <span data-translate="filter_answered">Answered</span>
+            </label>
+        </div>
+
         <div id="employeeQuestions"></div>
     </div>
 
