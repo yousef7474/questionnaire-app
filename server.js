@@ -2,17 +2,23 @@
 require('dotenv').config();
 
 const express = require('express');
-const cors = require('cors');
+const cors =require('cors');
 const mongoose = require('mongoose');
 const cron = require('node-cron');
 const emailService = require('./emailService');
 const multer = require('multer');
-const FormData = require('form-data');
-const fetch = require('node-fetch');
+const AWS = require('aws-sdk');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 const MONGO_URI = process.env.MONGO_URI;
+
+// --- AWS S3 Configuration ---
+const s3 = new AWS.S3({
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    region: process.env.AWS_REGION
+});
 
 // --- Middleware ---
 app.use(cors());
@@ -33,119 +39,53 @@ mongoose.connect(MONGO_URI)
 // =================================================================
 // --- DATABASE SCHEMAS & MODELS ---
 // =================================================================
-const EmployeeSchema = new mongoose.Schema({
-    username: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
-    fullName: { type: String, required: true },
-    email: { type: String, required: true, unique: true },
-    phone: { type: String },
-    department: { type: String },
-    registeredAt: { type: Date, default: Date.now }
-});
+const EmployeeSchema = new mongoose.Schema({ username: { type: String, required: true, unique: true }, password: { type: String, required: true }, fullName: { type: String, required: true }, email: { type: String, required: true, unique: true }, phone: { type: String }, department: { type: String }, registeredAt: { type: Date, default: Date.now }});
 const Employee = mongoose.model('Employee', EmployeeSchema);
-
-const QuestionSchema = new mongoose.Schema({
-    title: { type: String, required: true },
-    standard: { type: String },
-    indicatorNumber: { type: String },
-    practiceNumber: { type: String },
-    questionNumber: { type: String },
-    releaseTime: { type: Date, required: true },
-    expiryTime: { type: Date },
-    targetEmployees: [String],
-    createdBy: String,
-    createdAt: { type: Date, default: Date.now }
-});
+const QuestionSchema = new mongoose.Schema({ title: { type: String, required: true }, standard: { type: String }, indicatorNumber: { type: String }, practiceNumber: { type: String }, questionNumber: { type: String }, releaseTime: { type: Date, required: true }, expiryTime: { type: Date }, targetEmployees: [String], createdBy: String, createdAt: { type: Date, default: Date.now }});
 const Question = mongoose.model('Question', QuestionSchema);
-
-const ResponseSchema = new mongoose.Schema({
-    questionId: { type: mongoose.Schema.Types.ObjectId, ref: 'Question', required: true },
-    employeeUsername: { type: String, required: true },
-    employeeFullName: { type: String },
-    answer: { type: String, required: true },
-    attachmentUrl: String,
-    submittedAt: { type: Date, default: Date.now }
-});
+const ResponseSchema = new mongoose.Schema({ questionId: { type: mongoose.Schema.Types.ObjectId, ref: 'Question', required: true }, employeeUsername: { type: String, required: true }, employeeFullName: { type: String }, answer: { type: String, required: true }, attachmentUrl: String, submittedAt: { type: Date, default: Date.now }});
 const Response = mongoose.model('Response', ResponseSchema);
 
 // =================================================================
 // --- API ROUTES ---
 // =================================================================
 
-// ROBUST FILE UPLOAD ENDPOINT using Imgur - FIXED VERSION
+// FINAL ROBUST FILE UPLOAD ENDPOINT using AWS S3
 app.post('/api/upload', upload.single('file'), async (req, res) => {
     if (!req.file) {
         return res.status(400).json({ message: 'No file uploaded.' });
     }
-    
-    const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID;
-    if (!IMGUR_CLIENT_ID) {
-        console.error("CRITICAL: Imgur Client ID is not set in environment variables.");
-        return res.status(500).json({ message: "Server configuration error: Image hosting is not configured." });
+
+    const bucketName = process.env.S3_BUCKET_NAME;
+    if (!bucketName) {
+        console.error("CRITICAL: S3_BUCKET_NAME is not set.");
+        return res.status(500).json({ message: "File storage is not configured." });
     }
 
+    // Create a unique filename to prevent overwriting
+    const key = `${Date.now()}_${req.file.originalname.replace(/\s/g, '_')}`;
+
+    const params = {
+        Bucket: bucketName,
+        Key: key,
+        Body: req.file.buffer,
+        // ACL: 'public-read', // We will not make files public by default
+        ContentType: req.file.mimetype
+    };
+
     try {
-        // Log file details for debugging
-        console.log('File upload attempt:', {
-            originalname: req.file.originalname,
-            mimetype: req.file.mimetype,
-            size: req.file.size
-        });
-
-        const form = new FormData();
+        const uploadResult = await s3.upload(params).promise();
+        console.log(`File uploaded successfully to S3: ${uploadResult.Location}`);
         
-        // Convert buffer to base64 for Imgur API
-        const base64Data = req.file.buffer.toString('base64');
+        // Instead of a public URL, we'll use a presigned URL for secure, temporary access
+        const urlParams = { Bucket: bucketName, Key: key, Expires: 604800 }; // Expires in 7 days
+        const signedUrl = s3.getSignedUrl('getObject', urlParams);
         
-        // Imgur API expects base64 data for the 'image' field
-        form.append('image', base64Data);
-        form.append('type', 'base64'); // Changed from 'file' to 'base64'
-        form.append('name', req.file.originalname);
-        form.append('title', `Questionnaire Upload - ${req.file.originalname}`);
-
-        const imgurResponse = await fetch('https://api.imgur.com/3/upload', {
-            method: 'POST',
-            headers: {
-                'Authorization': `Client-ID ${IMGUR_CLIENT_ID}`,
-                ...form.getHeaders()
-            },
-            body: form
-        });
-
-        const imgurData = await imgurResponse.json();
+        res.json({ success: true, link: signedUrl });
         
-        // Enhanced error handling with more detailed logging
-        if (!imgurResponse.ok || !imgurData.success) {
-            console.error('Imgur API Error Details:', {
-                status: imgurResponse.status,
-                statusText: imgurResponse.statusText,
-                response: imgurData
-            });
-            
-            const errorMessage = imgurData.data && imgurData.data.error
-                ? (typeof imgurData.data.error === 'string' ? imgurData.data.error : JSON.stringify(imgurData.data.error))
-                : `Imgur server responded with ${imgurResponse.status}: ${imgurResponse.statusText}`;
-            
-            throw new Error(errorMessage);
-        }
-
-        console.log(`File uploaded successfully to Imgur: ${imgurData.data.link}`);
-        res.json({ success: true, link: imgurData.data.link });
-
     } catch (error) {
-        console.error('Error during file upload to Imgur:', error);
-        
-        // Provide more specific error messages
-        let errorMessage = 'Upload failed';
-        if (error.message.includes('Bad Request')) {
-            errorMessage = 'Invalid file format or corrupted file. Please try uploading a different file.';
-        } else if (error.message.includes('413')) {
-            errorMessage = 'File too large. Please upload a smaller file.';
-        } else {
-            errorMessage = `Upload failed: ${error.message}`;
-        }
-        
-        res.status(500).json({ message: errorMessage });
+        console.error('Error during S3 upload:', error);
+        res.status(500).json({ message: `Upload failed: ${error.message}` });
     }
 });
 
@@ -311,14 +251,7 @@ cron.schedule('0 * * * *', async () => {
             expiryTime: { $gte: reminderTimeStart, $lt: reminderTimeEnd }
         });
 
-        const deadlinePassedStart = new Date(now.getTime() - (25 * 60 * 60 * 1000));
-        const deadlinePassedEnd = new Date(now.getTime() - (24 * 60 * 60 * 1000));
-        const questionsDeadlinePassed = await Question.find({
-            expiryTime: { $gte: deadlinePassedStart, $lt: deadlinePassedEnd }
-        });
-
         if (questionsForReminder.length > 0) {
-            console.log(`Found ${questionsForReminder.length} question(s) for 24-hour reminder.`);
             for (const q of questionsForReminder) {
                 const responses = await Response.find({ questionId: q._id }).select('employeeUsername -_id');
                 const respondedUsernames = responses.map(r => r.employeeUsername);
@@ -327,26 +260,8 @@ cron.schedule('0 * * * *', async () => {
                     query.username.$in = q.targetEmployees;
                 }
                 const employeesToRemind = await Employee.find(query, 'email username');
-                console.log(`Sending ${employeesToRemind.length} reminders for question: "${q.title}"`);
                 employeesToRemind.forEach(emp => {
                     emailService.sendReminderEmail(emp.email, q.title);
-                });
-            }
-        }
-
-        if (questionsDeadlinePassed.length > 0) {
-            console.log(`Found ${questionsDeadlinePassed.length} question(s) for deadline-passed notification.`);
-            for (const q of questionsDeadlinePassed) {
-                const responses = await Response.find({ questionId: q._id }).select('employeeUsername -_id');
-                const respondedUsernames = responses.map(r => r.employeeUsername);
-                const query = { username: { $nin: respondedUsernames } };
-                if (!q.targetEmployees.includes('all')) {
-                    query.username.$in = q.targetEmployees;
-                }
-                const employeesToNotify = await Employee.find(query, 'email username');
-                console.log(`Sending ${employeesToNotify.length} deadline-passed notifications for question: "${q.title}"`);
-                employeesToNotify.forEach(emp => {
-                    emailService.sendDeadlinePassedEmail(emp.email, q.title);
                 });
             }
         }
