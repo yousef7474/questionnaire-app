@@ -36,6 +36,8 @@ const translations = {
         tab_create_questions: "Create Questions", tab_manage_questions: "Manage Questions", tab_view_responses: "View Responses", tab_manage_employees: "Manage Employees", tab_reminders: "Reminders", create_new_question_title: "Create New Question", label_question_title: "Question Title:", question_title_placeholder: "Enter your question", label_release_time: "Release Date & Time:", label_expiry_time: "Expiry Date & Time (Optional):", label_target_employees: "Target Employees:", option_all_employees: "All Employees", notification_settings_title: "Notification Settings", checkbox_email_notification: "Send email notification when question is released", checkbox_expiry_reminder: "Send reminder 24 hours before expiry", create_question_btn: "Create Question", manage_questions_title: "Manage Questions", export_excel_btn: "Export to Excel", employee_responses_title: "Employee Responses", export_all_responses_btn: "Export All Responses to Excel", registered_employees_title: "Registered Employees", reminder_settings_title: "Reminder Settings", reminder_settings_desc: "Configure automatic reminders for employees", checkbox_enable_reminders: "Enable automatic reminders for all questions", label_reminder_schedule: "Reminder Schedule:", option_24_hours: "24 hours before expiry", option_48_hours: "48 hours before expiry", option_72_hours: "72 hours before expiry", save_settings_btn: "Save Settings", employee_dashboard_title: "Employee Dashboard", my_profile_btn: "My Profile", edit_profile_btn: "Edit Profile", your_questions_title: "Your Questions", no_questions_available: "No questions are currently available for you.", your_response: "Your Response:", attachment_label: "Attachment:", view_attachment_link: "View Attachment", submitted_on: "Submitted on:", yes_option: "Yes", no_option: "No", attachment_label_optional: "Attachment (Optional):", paste_url_placeholder: "Or paste a URL", submit_response_btn: "Submit Response", profile_username: "Username:", profile_fullname: "Full Name:", profile_email: "Email:", profile_phone: "Phone:", profile_department: "Department:", profile_since: "Member Since:",
         filter_all: "All", filter_unanswered: "Unanswered", filter_answered: "Answered",
         no_answered_questions: "You have not answered any questions yet.", no_unanswered_questions: "You have answered all available questions. Great job!",
+        // NEW TRANSLATIONS FOR BUTTONS
+        btn_reassign: "Re-assign", btn_quick_reassign: "Quick Re-assign", btn_delete: "Delete", btn_reassign_selected: "Re-assign Selected", btn_delete_selected: "Delete Selected"
     },
     ar: {
         app_title: "منصة حوكِم", username_placeholder: "اسم المستخدم", password_placeholder: "كلمة المرور", select_role: "اختر الدور", role_admin: "مدير / مسؤول", role_employee: "موظف", login_btn: "تسجيل الدخول", register_link: "تسجيل كموظف جديد", demo_note: "تجريبي: استخدم أي اسم مستخدم/كلمة مرور", employee_registration_title: "تسجيل الموظف", full_name_placeholder: "الاسم الكامل", email_placeholder: "البريد الإلكتروني", phone_placeholder: "رقم الهاتف", department_placeholder: "القسم", register_btn: "تسجيل", back_to_login_link: "العودة إلى تسجيل الدخول", admin_dashboard_title: "لوحة تحكم المدير", logout_btn: "تسجيل الخروج",
@@ -43,6 +45,8 @@ const translations = {
         tab_create_questions: "إنشاء أسئلة", tab_manage_questions: "إدارة الأسئلة", tab_view_responses: "عرض الردود", tab_manage_employees: "إدارة الموظفين", tab_reminders: "التذكيرات", create_new_question_title: "إنشاء سؤال جديد", label_question_title: "عنوان السؤال:", question_title_placeholder: "أدخل سؤالك", label_release_time: "تاريخ ووقت النشر:", label_expiry_time: "تاريخ ووقت الانتهاء (اختياري):", label_target_employees: "الموظفون المستهدفون:", option_all_employees: "كل الموظفين", notification_settings_title: "إعدادات الإشعارات", checkbox_email_notification: "إرسال إشعار بالبريد الإلكتروني عند نشر السؤال", checkbox_expiry_reminder: "إرسال تذكير قبل 24 ساعة من الانتهاء", create_question_btn: "إنشاء السؤال", manage_questions_title: "إدارة الأسئلة", export_excel_btn: "تصدير إلى Excel", employee_responses_title: "ردود الموظفين", export_all_responses_btn: "تصدير كل الردود إلى Excel", registered_employees_title: "الموظفون المسجلون", reminder_settings_title: "إعدادات التذكير", reminder_settings_desc: "تكوين تذكيرات تلقائية للموظفين", checkbox_enable_reminders: "تمكين التذكيرات التلقائية لجميع الأسئلة", label_reminder_schedule: "جدول التذكير:", option_24_hours: "24 ساعة قبل الانتهاء", option_48_hours: "48 ساعة قبل الانتهاء", option_72_hours: "72 ساعة قبل الانتهاء", save_settings_btn: "حفظ الإعدادات", employee_dashboard_title: "لوحة تحكم الموظف", my_profile_btn: "ملفي الشخصي", edit_profile_btn: "تعديل الملف الشخصي", your_questions_title: "أسئلتك", no_questions_available: "لا توجد أسئلة متاحة لك حاليًا.", your_response: "إجابتك:", attachment_label: "المرفق:", view_attachment_link: "عرض المرفق", submitted_on: "تم الإرسال في:", yes_option: "نعم", no_option: "لا", attachment_label_optional: "مرفق (اختياري):", paste_url_placeholder: "أو الصق رابطًا هنا", submit_response_btn: "إرسال الإجابة", profile_username: "اسم المستخدم:", profile_fullname: "الاسم الكامل:", profile_email: "البريد الإلكتروني:", profile_phone: "الهاتف:", profile_department: "القسم:", profile_since: "عضو منذ:",
         filter_all: "الكل", filter_unanswered: "لم تتم الإجابة عليها", filter_answered: "تمت الإجابة عليها",
         no_answered_questions: "لم تقم بالإجابة على أي أسئلة بعد.", no_unanswered_questions: "لقد أجبت على جميع الأسئلة المتاحة. عمل رائع!",
+        // NEW ARABIC TRANSLATIONS FOR BUTTONS
+        btn_reassign: "إعادة تكليف", btn_quick_reassign: "إعادة تكليف سريع", btn_delete: "حذف", btn_reassign_selected: "إعادة تكليف المحدد", btn_delete_selected: "حذف المحدد"
     }
 };
 
@@ -67,10 +71,42 @@ function setLanguage(lang) {
         document.documentElement.lang = 'en';
     }
     localStorage.setItem('language', lang);
+    
+    // Update dynamically created buttons
+    updateButtonTranslations(lang);
+}
+
+// Function to update button translations
+function updateButtonTranslations(lang) {
+    const currentLang = lang || localStorage.getItem('language') || 'en';
+    
+    // Update reassign buttons
+    document.querySelectorAll('button[onclick*="reassignQuestionWithCalendar"]').forEach(btn => {
+        btn.innerHTML = `📅 ${translations[currentLang].btn_reassign}`;
+    });
+    
+    // Update quick reassign buttons
+    document.querySelectorAll('button[onclick*="quickReassignQuestion"]').forEach(btn => {
+        btn.innerHTML = `⚡ ${translations[currentLang].btn_quick_reassign}`;
+    });
+    
+    // Update delete buttons
+    document.querySelectorAll('button[onclick*="deleteQuestion"]').forEach(btn => {
+        btn.innerHTML = `🗑️ ${translations[currentLang].btn_delete}`;
+    });
+    
+    // Update bulk action buttons
+    document.querySelectorAll('button[onclick*="reassignSelectedQuestions"]').forEach(btn => {
+        btn.textContent = translations[currentLang].btn_reassign_selected;
+    });
+    
+    document.querySelectorAll('button[onclick*="deleteSelectedQuestions"]').forEach(btn => {
+        btn.textContent = translations[currentLang].btn_delete_selected;
+    });
 }
 
 // =================================================================
-// --- PERMANENT MODAL FIX - Prevent Modal from Showing ---
+// --- PERMANENT MODAL FIX - Prevent Old Modal from Showing ---
 // =================================================================
 
 function forceHideModal() {
@@ -84,9 +120,9 @@ function forceHideModal() {
     }
 }
 
-// Override all modal-related functions to prevent modal from showing
+// Override old modal-related functions to prevent old modal from showing
 function reassignSelectedModal() {
-    console.log('Reassign modal is permanently disabled');
+    console.log('Old reassign modal is disabled - using new calendar modal');
     return false;
 }
 
@@ -107,6 +143,392 @@ function handleReassignSubmit(e) {
     return false;
 }
 // =================================================================
+// --- CALENDAR MODAL FUNCTIONALITY ---
+// =================================================================
+
+// 1. CREATE CALENDAR MODAL
+function createCalendarModal() {
+    const modalHtml = `
+        <div id="calendarModal" class="modal-overlay" style="display: none;">
+            <div class="calendar-modal-content">
+                <div class="calendar-header">
+                    <h3>📅 Re-assign Question - Select Dates</h3>
+                    <button class="close-calendar-btn" onclick="closeCalendarModal()">&times;</button>
+                </div>
+                
+                <div class="calendar-body">
+                    <div class="question-info">
+                        <div id="calendarQuestionInfo"></div>
+                    </div>
+                    
+                    <div class="date-selection-container">
+                        <!-- Release Date Section -->
+                        <div class="date-section">
+                            <h4>🚀 Release Date & Time</h4>
+                            <div class="date-picker-container">
+                                <input type="date" id="calendarReleaseDate" class="date-input">
+                                <input type="time" id="calendarReleaseTime" class="time-input" value="09:00">
+                            </div>
+                            <div class="selected-datetime" id="selectedReleaseDateTime"></div>
+                        </div>
+                        
+                        <!-- Expiry Date Section -->
+                        <div class="date-section">
+                            <h4>⏰ Expiry Date & Time (Optional)</h4>
+                            <div class="date-picker-container">
+                                <input type="date" id="calendarExpiryDate" class="date-input">
+                                <input type="time" id="calendarExpiryTime" class="time-input" value="23:59">
+                                <button type="button" class="clear-date-btn" onclick="clearExpiryDate()">Clear</button>
+                            </div>
+                            <div class="selected-datetime" id="selectedExpiryDateTime"></div>
+                        </div>
+                        
+                        <!-- Employee Selection -->
+                        <div class="employee-section">
+                            <h4>👥 Target Employees</h4>
+                            <div class="employee-selection">
+                                <select id="calendarTargetEmployees" multiple class="employee-select">
+                                    <option value="all">🌟 All Employees</option>
+                                </select>
+                                <div class="employee-selection-help">
+                                    Hold Ctrl/Cmd to select multiple employees
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="calendar-footer">
+                    <button class="cancel-btn" onclick="closeCalendarModal()">Cancel</button>
+                    <button class="confirm-btn" onclick="confirmCalendarReassign()">✅ Confirm Re-assign</button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Add to page if not exists
+    if (!document.getElementById('calendarModal')) {
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+        addCalendarStyles();
+        setupCalendarEventListeners();
+    }
+}
+
+// 2. ADD CALENDAR STYLES
+function addCalendarStyles() {
+    const calendarStyles = `
+        <style id="calendarModalStyles">
+            .calendar-modal-content {
+                background: var(--bg-primary);
+                border-radius: 15px;
+                padding: 0;
+                width: 90%;
+                max-width: 600px;
+                max-height: 90vh;
+                overflow-y: auto;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+                direction: ltr;
+                text-align: left;
+            }
+            
+            .calendar-header {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                padding: 20px;
+                border-radius: 15px 15px 0 0;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+            
+            .calendar-header h3 {
+                margin: 0;
+                color: white;
+            }
+            
+            .close-calendar-btn {
+                background: rgba(255,255,255,0.2);
+                border: none;
+                color: white;
+                font-size: 24px;
+                width: 35px;
+                height: 35px;
+                border-radius: 50%;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            
+            .close-calendar-btn:hover {
+                background: rgba(255,255,255,0.3);
+            }
+            
+            .calendar-body {
+                padding: 25px;
+            }
+            
+            .question-info {
+                background: var(--bg-secondary);
+                padding: 15px;
+                border-radius: 10px;
+                margin-bottom: 25px;
+                border-left: 4px solid #667eea;
+            }
+            
+            .date-section {
+                background: var(--bg-secondary);
+                padding: 20px;
+                border-radius: 10px;
+                margin-bottom: 20px;
+                border: 1px solid var(--border-color);
+            }
+            
+            .date-section h4 {
+                margin: 0 0 15px 0;
+                color: var(--text-primary);
+                font-size: 16px;
+            }
+            
+            .date-picker-container {
+                display: flex;
+                gap: 10px;
+                align-items: center;
+                flex-wrap: wrap;
+            }
+            
+            .date-input, .time-input {
+                flex: 1;
+                min-width: 140px;
+                padding: 12px;
+                border: 2px solid var(--border-color);
+                border-radius: 8px;
+                font-size: 14px;
+                background: var(--bg-primary);
+                color: var(--text-primary);
+            }
+            
+            .date-input:focus, .time-input:focus {
+                border-color: #667eea;
+                outline: none;
+                box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            }
+            
+            .clear-date-btn {
+                background: #f56565;
+                color: white;
+                border: none;
+                padding: 8px 12px;
+                border-radius: 6px;
+                cursor: pointer;
+                font-size: 12px;
+            }
+            
+            .clear-date-btn:hover {
+                background: #e53e3e;
+            }
+            
+            .selected-datetime {
+                margin-top: 10px;
+                padding: 8px 12px;
+                background: rgba(102, 126, 234, 0.1);
+                border-radius: 6px;
+                font-size: 13px;
+                color: var(--text-secondary);
+                min-height: 20px;
+            }
+            
+            .employee-section {
+                background: var(--bg-secondary);
+                padding: 20px;
+                border-radius: 10px;
+                border: 1px solid var(--border-color);
+            }
+            
+            .employee-section h4 {
+                margin: 0 0 15px 0;
+                color: var(--text-primary);
+            }
+            
+            .employee-select {
+                width: 100%;
+                height: 120px;
+                padding: 10px;
+                border: 2px solid var(--border-color);
+                border-radius: 8px;
+                background: var(--bg-primary);
+                color: var(--text-primary);
+                font-size: 14px;
+            }
+            
+            .employee-select:focus {
+                border-color: #667eea;
+                outline: none;
+            }
+            
+            .employee-selection-help {
+                margin-top: 8px;
+                font-size: 12px;
+                color: var(--text-secondary);
+                font-style: italic;
+            }
+            
+            .calendar-footer {
+                padding: 20px 25px;
+                border-top: 1px solid var(--border-color);
+                display: flex;
+                justify-content: flex-end;
+                gap: 15px;
+                background: var(--bg-secondary);
+                border-radius: 0 0 15px 15px;
+            }
+            
+            .cancel-btn, .confirm-btn {
+                padding: 12px 24px;
+                border: none;
+                border-radius: 8px;
+                font-size: 14px;
+                font-weight: 500;
+                cursor: pointer;
+                transition: all 0.3s ease;
+            }
+            
+            .cancel-btn {
+                background: #a0aec0;
+                color: white;
+            }
+            
+            .cancel-btn:hover {
+                background: #718096;
+            }
+            
+            .confirm-btn {
+                background: #48bb78;
+                color: white;
+            }
+            
+            .confirm-btn:hover {
+                background: #38a169;
+                transform: translateY(-1px);
+            }
+            
+            @media (max-width: 768px) {
+                .calendar-modal-content {
+                    width: 95%;
+                    max-height: 95vh;
+                }
+                
+                .date-picker-container {
+                    flex-direction: column;
+                    align-items: stretch;
+                }
+                
+                .date-input, .time-input {
+                    min-width: auto;
+                }
+                
+                .calendar-footer {
+                    flex-direction: column;
+                }
+                
+                .cancel-btn, .confirm-btn {
+                    width: 100%;
+                }
+            }
+        </style>
+    `;
+    
+    if (!document.getElementById('calendarModalStyles')) {
+        document.head.insertAdjacentHTML('beforeend', calendarStyles);
+    }
+}
+
+// 3. SETUP EVENT LISTENERS
+function setupCalendarEventListeners() {
+    // Update display when dates change
+    document.getElementById('calendarReleaseDate').addEventListener('change', updateReleaseDateDisplay);
+    document.getElementById('calendarReleaseTime').addEventListener('change', updateReleaseDateDisplay);
+    document.getElementById('calendarExpiryDate').addEventListener('change', updateExpiryDateDisplay);
+    document.getElementById('calendarExpiryTime').addEventListener('change', updateExpiryDateDisplay);
+    
+    // Close modal on outside click
+    document.getElementById('calendarModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeCalendarModal();
+        }
+    });
+    
+    // Close modal on Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && !document.getElementById('calendarModal').style.display === 'none') {
+            closeCalendarModal();
+        }
+    });
+}
+
+// 4. UPDATE DATE DISPLAYS
+function updateReleaseDateDisplay() {
+    const dateInput = document.getElementById('calendarReleaseDate');
+    const timeInput = document.getElementById('calendarReleaseTime');
+    const display = document.getElementById('selectedReleaseDateTime');
+    
+    if (dateInput.value && timeInput.value) {
+        const dateTime = new Date(`${dateInput.value}T${timeInput.value}`);
+        display.innerHTML = `📅 <strong>Selected:</strong> ${dateTime.toLocaleString()}`;
+        display.style.color = '#48bb78';
+    } else {
+        display.innerHTML = '⚠️ Please select release date and time';
+        display.style.color = '#f56565';
+    }
+}
+
+function updateExpiryDateDisplay() {
+    const dateInput = document.getElementById('calendarExpiryDate');
+    const timeInput = document.getElementById('calendarExpiryTime');
+    const display = document.getElementById('selectedExpiryDateTime');
+    
+    if (dateInput.value && timeInput.value) {
+        const dateTime = new Date(`${dateInput.value}T${timeInput.value}`);
+        display.innerHTML = `📅 <strong>Selected:</strong> ${dateTime.toLocaleString()}`;
+        display.style.color = '#48bb78';
+    } else {
+        display.innerHTML = '💡 No expiry date (question will remain active indefinitely)';
+        display.style.color = 'var(--text-secondary)';
+    }
+}
+
+// 5. CLEAR EXPIRY DATE
+function clearExpiryDate() {
+    document.getElementById('calendarExpiryDate').value = '';
+    document.getElementById('calendarExpiryTime').value = '23:59';
+    updateExpiryDateDisplay();
+}
+
+// 6. CLOSE CALENDAR MODAL
+function closeCalendarModal() {
+    const modal = document.getElementById('calendarModal');
+    if (modal) {
+        modal.style.display = 'none';
+        // Reset modal state
+        modal.dataset.questionId = '';
+        modal.dataset.bulkQuestionIds = '';
+        modal.dataset.isBulk = 'false';
+        
+        // Reset confirm button text
+        const confirmBtn = document.querySelector('.confirm-btn');
+        if (confirmBtn) {
+            confirmBtn.textContent = '✅ Confirm Re-assign';
+            confirmBtn.disabled = false;
+        }
+        
+        // Reset header text
+        const headerTitle = document.querySelector('.calendar-header h3');
+        if (headerTitle) {
+            headerTitle.textContent = '📅 Re-assign Question - Select Dates';
+        }
+    }
+}
+// =================================================================
 // --- Page Load & Session Management ---
 // =================================================================
 
@@ -117,10 +539,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const savedLang = localStorage.getItem('language') || 'en';
     setLanguage(savedLang);
 
-    // PERMANENT MODAL FIX - Force hide modal immediately on page load
+    // PERMANENT MODAL FIX - Force hide old modal immediately on page load
     forceHideModal();
     
-    // Add CSS to force hide the modal
+    // Add CSS to force hide the old modal
     const style = document.createElement('style');
     style.textContent = `
         #reassignModal {
@@ -129,30 +551,8 @@ document.addEventListener('DOMContentLoaded', () => {
             opacity: 0 !important;
             pointer-events: none !important;
         }
-        
-        button[onclick*="reassignSelectedModal"],
-        button[onclick*="reassignQuestion"] {
-            display: none !important;
-        }
     `;
     document.head.appendChild(style);
-
-    // Hide reassign buttons after a short delay
-    setTimeout(() => {
-        document.querySelectorAll('button[onclick*="reassignSelectedModal"]').forEach(btn => {
-            btn.style.display = 'none';
-        });
-        
-        document.querySelectorAll('button[onclick*="reassignQuestion"]').forEach(btn => {
-            btn.style.display = 'none';
-        });
-        
-        document.querySelectorAll('button').forEach(btn => {
-            if (btn.textContent.includes('Re-assign') || btn.textContent.includes('reassign')) {
-                btn.style.display = 'none';
-            }
-        });
-    }, 500);
 
     document.body.addEventListener('click', function(event) {
         if (event.target.id === 'themeToggle' || event.target.id === 'employeeThemeToggle') {
@@ -364,6 +764,9 @@ function loadQuestions(filterStandard = 'all') {
         const responseCount = responses.filter(r => r.questionId === q._id).length;
         const targetCount = q.targetEmployees.includes('all') ? employees.length : q.targetEmployees.length;
         
+        // Get current language for button text
+        const currentLang = localStorage.getItem('language') || 'en';
+        
         const card = document.createElement('div');
         card.className = 'question-card';
         card.innerHTML = `
@@ -380,14 +783,14 @@ function loadQuestions(filterStandard = 'all') {
             <p><strong>Target:</strong> ${q.targetEmployees.join(', ')}</p>
             <p><strong>Responses:</strong> ${responseCount} / ${targetCount}</p>
             <div style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
-                <button class="secondary-btn" onclick="reassignQuestion('${q._id}')" title="Re-assign with new settings">
-                    Re-assign
+                <button class="secondary-btn" onclick="reassignQuestionWithCalendar('${q._id}')" title="Re-assign with calendar date picker">
+                    📅 ${translations[currentLang].btn_reassign}
                 </button>
                 <button class="info-btn" onclick="quickReassignQuestion('${q._id}')" title="Quick re-assign with current settings">
-                    Quick Re-assign
+                    ⚡ ${translations[currentLang].btn_quick_reassign}
                 </button>
                 <button class="danger-btn" onclick="deleteQuestion('${q._id}')">
-                    Delete
+                    🗑️ ${translations[currentLang].btn_delete}
                 </button>
             </div>
         `;
@@ -549,7 +952,379 @@ function loadEmployeeQuestions(filter = 'all') {
     });
     setLanguage(localStorage.getItem('language') || 'en');
 }
+// =================================================================
+// --- CALENDAR RE-ASSIGN FUNCTIONS ---
+// =================================================================
 
+// CALENDAR-BASED RE-ASSIGN FUNCTION FOR INDIVIDUAL QUESTIONS
+async function reassignQuestionWithCalendar(questionId) {
+    const question = questions.find(q => q._id === questionId);
+    if (!question) {
+        alert('Question not found.');
+        return;
+    }
+
+    // Create modal if it doesn't exist
+    createCalendarModal();
+    
+    // Populate question info
+    const questionInfo = document.getElementById('calendarQuestionInfo');
+    questionInfo.innerHTML = `
+        <div style="margin-bottom: 10px;">
+            <strong>📋 Question:</strong> "${question.title}"
+        </div>
+        <div style="margin-bottom: 10px;">
+            <strong>📊 Standard:</strong> ${question.standard || 'N/A'}
+        </div>
+        <div style="margin-bottom: 10px;">
+            <strong>🕐 Current Release:</strong> ${new Date(question.releaseTime).toLocaleString()}
+        </div>
+        <div style="margin-bottom: 10px;">
+            <strong>⏰ Current Expiry:</strong> ${question.expiryTime ? new Date(question.expiryTime).toLocaleString() : 'No expiry'}
+        </div>
+        <div>
+            <strong>👥 Current Targets:</strong> ${question.targetEmployees.join(', ')}
+        </div>
+    `;
+    
+    // Set default dates
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const weekLater = new Date();
+    weekLater.setDate(weekLater.getDate() + 8);
+    
+    document.getElementById('calendarReleaseDate').value = tomorrow.toISOString().split('T')[0];
+    document.getElementById('calendarReleaseTime').value = '09:00';
+    document.getElementById('calendarExpiryDate').value = weekLater.toISOString().split('T')[0];
+    document.getElementById('calendarExpiryTime').value = '23:59';
+    
+    // Populate employee options
+    const employeeSelect = document.getElementById('calendarTargetEmployees');
+    employeeSelect.innerHTML = '<option value="all">🌟 All Employees</option>';
+    employees.forEach(emp => {
+        const option = document.createElement('option');
+        option.value = emp.username;
+        option.textContent = `${emp.fullName} (${emp.department || 'No Dept'})`;
+        if (question.targetEmployees.includes(emp.username)) {
+            option.selected = true;
+        }
+        employeeSelect.appendChild(option);
+    });
+    
+    // Select "all" if it was selected before
+    if (question.targetEmployees.includes('all')) {
+        employeeSelect.querySelector('option[value="all"]').selected = true;
+    }
+    
+    // Update displays
+    updateReleaseDateDisplay();
+    updateExpiryDateDisplay();
+    
+    // Store question ID for confirmation
+    document.getElementById('calendarModal').dataset.questionId = questionId;
+    document.getElementById('calendarModal').dataset.isBulk = 'false';
+    
+    // Show modal
+    document.getElementById('calendarModal').style.display = 'flex';
+}
+
+// BULK CALENDAR RE-ASSIGN FUNCTION
+async function bulkReassignWithCalendar() {
+    const selectedCheckboxes = document.querySelectorAll('#questionsList .question-select-checkbox:checked');
+    const selectedIds = Array.from(selectedCheckboxes).map(cb => cb.value);
+
+    if (selectedIds.length === 0) {
+        alert('Please select at least one question to re-assign.');
+        return;
+    }
+
+    // Create modal if it doesn't exist
+    createCalendarModal();
+    
+    // Update header for bulk operation
+    document.querySelector('.calendar-header h3').textContent = `📅 Bulk Re-assign ${selectedIds.length} Questions`;
+    
+    // Show selected questions info
+    const questionInfo = document.getElementById('calendarQuestionInfo');
+    const selectedQuestions = selectedIds.map(id => {
+        const q = questions.find(question => question._id === id);
+        return q ? q.title : 'Unknown';
+    });
+    
+    const displayQuestions = selectedQuestions.slice(0, 3);
+    const moreCount = selectedQuestions.length - 3;
+    
+    questionInfo.innerHTML = `
+        <div style="margin-bottom: 15px;">
+            <strong>📋 Selected Questions (${selectedIds.length}):</strong>
+        </div>
+        <div style="margin-left: 15px;">
+            ${displayQuestions.map(title => `• ${title}`).join('<br>')}
+            ${moreCount > 0 ? `<br>• ... and ${moreCount} more questions` : ''}
+        </div>
+        <div style="margin-top: 15px; padding: 10px; background: rgba(102, 126, 234, 0.1); border-radius: 6px;">
+            <strong>⚠️ Note:</strong> All selected questions will get the same new schedule and target employees.
+        </div>
+    `;
+    
+    // Set default dates
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const weekLater = new Date();
+    weekLater.setDate(weekLater.getDate() + 8);
+    
+    document.getElementById('calendarReleaseDate').value = tomorrow.toISOString().split('T')[0];
+    document.getElementById('calendarReleaseTime').value = '09:00';
+    document.getElementById('calendarExpiryDate').value = weekLater.toISOString().split('T')[0];
+    document.getElementById('calendarExpiryTime').value = '23:59';
+    
+    // Populate employee options (default to "all" for bulk)
+    const employeeSelect = document.getElementById('calendarTargetEmployees');
+    employeeSelect.innerHTML = '<option value="all" selected>🌟 All Employees</option>';
+    employees.forEach(emp => {
+        const option = document.createElement('option');
+        option.value = emp.username;
+        option.textContent = `${emp.fullName} (${emp.department || 'No Dept'})`;
+        employeeSelect.appendChild(option);
+    });
+    
+    // Update displays
+    updateReleaseDateDisplay();
+    updateExpiryDateDisplay();
+    
+    // Store selected IDs for bulk confirmation
+    document.getElementById('calendarModal').dataset.bulkQuestionIds = selectedIds.join(',');
+    document.getElementById('calendarModal').dataset.isBulk = 'true';
+    
+    // Update confirm button text
+    document.querySelector('.confirm-btn').textContent = `✅ Confirm Bulk Re-assign (${selectedIds.length})`;
+    
+    // Show modal
+    document.getElementById('calendarModal').style.display = 'flex';
+}
+
+// GET CALENDAR FORM DATA
+function getCalendarFormData() {
+    const releaseDate = document.getElementById('calendarReleaseDate').value;
+    const releaseTime = document.getElementById('calendarReleaseTime').value;
+    const expiryDate = document.getElementById('calendarExpiryDate').value;
+    const expiryTime = document.getElementById('calendarExpiryTime').value;
+    const selectedEmployees = Array.from(document.getElementById('calendarTargetEmployees').selectedOptions)
+        .map(option => option.value);
+    
+    // Validate
+    if (!releaseDate || !releaseTime) {
+        alert('Please select release date and time.');
+        return { releaseDateTime: null, selectedEmployees: null };
+    }
+    
+    if (selectedEmployees.length === 0) {
+        alert('Please select at least one target employee.');
+        return { releaseDateTime: null, selectedEmployees: null };
+    }
+    
+    const releaseDateTime = new Date(`${releaseDate}T${releaseTime}`);
+    let expiryDateTime = null;
+    
+    if (expiryDate && expiryTime) {
+        expiryDateTime = new Date(`${expiryDate}T${expiryTime}`);
+        if (expiryDateTime <= releaseDateTime) {
+            alert('Expiry date must be after release date.');
+            return { releaseDateTime: null, selectedEmployees: null };
+        }
+    }
+    
+    return { releaseDateTime, expiryDateTime, selectedEmployees };
+}
+
+// CONFIRM CALENDAR RE-ASSIGN (HANDLES BOTH SINGLE AND BULK)
+async function confirmCalendarReassign() {
+    const modal = document.getElementById('calendarModal');
+    const isBulk = modal.dataset.isBulk === 'true';
+    
+    if (isBulk) {
+        await confirmBulkCalendarReassign();
+    } else {
+        await confirmSingleCalendarReassign();
+    }
+}
+
+// SINGLE QUESTION CONFIRM
+async function confirmSingleCalendarReassign() {
+    const questionId = document.getElementById('calendarModal').dataset.questionId;
+    const question = questions.find(q => q._id === questionId);
+    
+    if (!question) {
+        alert('Question not found.');
+        return;
+    }
+    
+    const { releaseDateTime, expiryDateTime, selectedEmployees } = getCalendarFormData();
+    if (!releaseDateTime || !selectedEmployees) return;
+    
+    const newQuestionData = {
+        title: question.title,
+        standard: question.standard,
+        indicatorNumber: question.indicatorNumber,
+        practiceNumber: question.practiceNumber,
+        questionNumber: question.questionNumber,
+        releaseTime: releaseDateTime,
+        expiryTime: expiryDateTime,
+        targetEmployees: selectedEmployees,
+        createdBy: currentUser.username,
+    };
+    
+    try {
+        const response = await fetch(`${API_URL}/questions`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(newQuestionData)
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to create re-assigned question.');
+        }
+        
+        closeCalendarModal();
+        
+        alert(`✅ Question re-assigned successfully!\n\n📅 Release: ${releaseDateTime.toLocaleString()}\n⏰ Expiry: ${expiryDateTime ? expiryDateTime.toLocaleString() : 'No expiry'}\n👥 Targets: ${selectedEmployees.join(', ')}`);
+        
+        await fetchAllData();
+        renderAdminDashboard();
+    } catch (error) {
+        alert(`❌ Error re-assigning question: ${error.message}`);
+    }
+}
+
+// BULK QUESTIONS CONFIRM
+async function confirmBulkCalendarReassign() {
+    const selectedIds = document.getElementById('calendarModal').dataset.bulkQuestionIds.split(',');
+    
+    const { releaseDateTime, expiryDateTime, selectedEmployees } = getCalendarFormData();
+    if (!releaseDateTime || !selectedEmployees) return;
+    
+    // Show progress
+    const confirmBtn = document.querySelector('.confirm-btn');
+    const originalText = confirmBtn.textContent;
+    confirmBtn.disabled = true;
+    
+    let successCount = 0;
+    let failureCount = 0;
+    
+    try {
+        for (let i = 0; i < selectedIds.length; i++) {
+            const questionId = selectedIds[i];
+            const originalQuestion = questions.find(q => q._id === questionId);
+            
+            if (!originalQuestion) {
+                failureCount++;
+                continue;
+            }
+            
+            confirmBtn.textContent = `Processing ${i + 1}/${selectedIds.length}...`;
+            
+            const newQuestionData = {
+                title: originalQuestion.title,
+                standard: originalQuestion.standard,
+                indicatorNumber: originalQuestion.indicatorNumber,
+                practiceNumber: originalQuestion.practiceNumber,
+                questionNumber: originalQuestion.questionNumber,
+                releaseTime: releaseDateTime,
+                expiryTime: expiryDateTime,
+                targetEmployees: selectedEmployees,
+                createdBy: currentUser.username,
+            };
+            
+            try {
+                const response = await fetch(`${API_URL}/questions`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(newQuestionData)
+                });
+                
+                if (response.ok) {
+                    successCount++;
+                } else {
+                    failureCount++;
+                }
+            } catch (error) {
+                failureCount++;
+            }
+            
+            // Small delay between requests
+            if (i < selectedIds.length - 1) {
+                await new Promise(resolve => setTimeout(resolve, 300));
+            }
+        }
+        
+        closeCalendarModal();
+        
+        // Clear selections
+        document.querySelectorAll('#questionsList .question-select-checkbox:checked').forEach(cb => {
+            cb.checked = false;
+        });
+        updateBulkActionState();
+        
+        alert(`✅ Bulk Re-assignment Completed!\n\n📊 Results:\n• Successful: ${successCount}\n• Failed: ${failureCount}\n\n📅 New Schedule:\n• Release: ${releaseDateTime.toLocaleString()}\n• Expiry: ${expiryDateTime ? expiryDateTime.toLocaleString() : 'No expiry'}`);
+        
+        // Refresh data if any were successful
+        if (successCount > 0) {
+            await fetchAllData();
+            renderAdminDashboard();
+        }
+        
+    } catch (error) {
+        alert(`❌ Error during bulk re-assignment: ${error.message}`);
+    } finally {
+        // Reset button
+        confirmBtn.textContent = originalText;
+        confirmBtn.disabled = false;
+    }
+}
+
+// QUICK RE-ASSIGN FUNCTION (Same date, same employees)
+async function quickReassignQuestion(questionId) {
+    const question = questions.find(q => q._id === questionId);
+    if (!question) {
+        alert('Question not found.');
+        return;
+    }
+
+    if (!confirm(`Quick re-assign "${question.title}" with current settings?\n\nThis will create a new question with:\n- Release: Now\n- Expiry: Same as original\n- Targets: Same as original`)) {
+        return;
+    }
+
+    const newQuestionData = {
+        title: question.title,
+        standard: question.standard,
+        indicatorNumber: question.indicatorNumber,
+        practiceNumber: question.practiceNumber,
+        questionNumber: question.questionNumber,
+        releaseTime: new Date(), // Now
+        expiryTime: question.expiryTime ? new Date(question.expiryTime) : null,
+        targetEmployees: question.targetEmployees,
+        createdBy: currentUser.username,
+    };
+
+    try {
+        const response = await fetch(`${API_URL}/questions`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(newQuestionData)
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to quick re-assign question.');
+        }
+
+        alert('Question quickly re-assigned successfully!');
+        
+        await fetchAllData();
+        renderAdminDashboard();
+    } catch (error) {
+        alert(`Error quick re-assigning question: ${error.message}`);
+    }
+}
 // =================================================================
 // --- Actions (Functions that send data TO the server) ---
 // =================================================================
@@ -651,6 +1426,7 @@ async function submitResponse(event, questionId) {
         submitButton.textContent = originalButtonText;
     }
 }
+
 async function deleteQuestion(id) {
     if (!confirm('Are you sure you want to delete this question and all its associated responses?')) return;
     try {
@@ -706,352 +1482,7 @@ async function editEmployee(id, currentDepartment) {
     }
 }
 
-async function reassignQuestion(questionId) {
-    const question = questions.find(q => q._id === questionId);
-    if (!question) {
-        alert('Question not found.');
-        return;
-    }
-
-    // Show question details
-    const questionDetails = `Question: "${question.title}"
-Standard: ${question.standard || 'N/A'}
-Current Release: ${new Date(question.releaseTime).toLocaleString()}
-Current Expiry: ${question.expiryTime ? new Date(question.expiryTime).toLocaleString() : 'No expiry'}`;
-
-    if (!confirm(`Re-assign this question?\n\n${questionDetails}`)) {
-        return;
-    }
-
-    // Get new release date
-    const newReleaseDate = prompt('Enter new release date and time (YYYY-MM-DD HH:MM):', 
-        new Date().toISOString().slice(0, 16).replace('T', ' '));
-    
-    if (!newReleaseDate) {
-        alert('Re-assignment cancelled.');
-        return;
-    }
-
-    // Get new expiry date (optional)
-    const newExpiryDate = prompt('Enter new expiry date and time (optional, YYYY-MM-DD HH:MM):', '');
-
-    // Get target employees
-    const employeeOptions = ['all', ...employees.map(emp => `${emp.username} (${emp.fullName})`)];
-    const selectedEmployees = [];
-
-    let employeeSelection = '';
-    while (true) {
-        const availableOptions = employeeOptions.filter(opt => !selectedEmployees.includes(opt));
-        if (availableOptions.length === 0) break;
-
-        employeeSelection = prompt(
-            `Select target employees (current: ${selectedEmployees.length > 0 ? selectedEmployees.join(', ') : 'none'}):\n\n` +
-            availableOptions.map((opt, idx) => `${idx + 1}. ${opt}`).join('\n') + 
-            '\n\nEnter number (1-' + availableOptions.length + '), or "done" to finish:',
-            selectedEmployees.length === 0 ? '1' : 'done'
-        );
-
-        if (!employeeSelection || employeeSelection.toLowerCase() === 'done') {
-            break;
-        }
-
-        const selectedIndex = parseInt(employeeSelection) - 1;
-        if (selectedIndex >= 0 && selectedIndex < availableOptions.length) {
-            selectedEmployees.push(availableOptions[selectedIndex]);
-        } else {
-            alert('Invalid selection. Please try again.');
-        }
-    }
-
-    if (selectedEmployees.length === 0) {
-        alert('No employees selected. Re-assignment cancelled.');
-        return;
-    }
-
-    // Process selected employees
-    const targetEmployees = selectedEmployees.map(emp => {
-        if (emp === 'all') return 'all';
-        return emp.split(' (')[0]; // Extract username
-    });
-
-    // Create new question
-    const newQuestionData = {
-        title: question.title,
-        standard: question.standard,
-        indicatorNumber: question.indicatorNumber,
-        practiceNumber: question.practiceNumber,
-        questionNumber: question.questionNumber,
-        releaseTime: new Date(newReleaseDate),
-        expiryTime: newExpiryDate ? new Date(newExpiryDate) : null,
-        targetEmployees: targetEmployees,
-        createdBy: currentUser.username,
-    };
-
-    try {
-        const response = await fetch(`${API_URL}/questions`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(newQuestionData)
-        });
-
-        if (!response.ok) {
-            throw new Error('Failed to create re-assigned question.');
-        }
-
-        const newQuestion = await response.json();
-        questions.push(newQuestion);
-        
-        alert(`Question re-assigned successfully!\nNew release: ${newReleaseDate}\nTargets: ${targetEmployees.join(', ')}`);
-        
-        await fetchAllData();
-        renderAdminDashboard();
-    } catch (error) {
-        alert(`Error re-assigning question: ${error.message}`);
-    }
-}
-
-async function reassignSelectedQuestions() {
-    const selectedCheckboxes = document.querySelectorAll('#questionsList .question-select-checkbox:checked');
-    const selectedIds = Array.from(selectedCheckboxes).map(cb => cb.value);
-
-    if (selectedIds.length === 0) {
-        alert('Please select at least one question to re-assign.');
-        return;
-    }
-
-    if (!confirm(`Re-assign ${selectedIds.length} selected question(s)?`)) {
-        return;
-    }
-
-    // Get new release date
-    const newReleaseDate = prompt('Enter new release date and time for all questions (YYYY-MM-DD HH:MM):', 
-        new Date().toISOString().slice(0, 16).replace('T', ' '));
-    
-    if (!newReleaseDate) {
-        alert('Re-assignment cancelled.');
-        return;
-    }
-
-    // Get new expiry date (optional)
-    const newExpiryDate = prompt('Enter new expiry date and time (optional, YYYY-MM-DD HH:MM):', '');
-
-    // Simple employee selection for bulk
-    const employeeChoice = prompt(
-        'Select target employees:\n' +
-        '1. All employees\n' +
-        '2. Specific employees (will prompt for each)\n\n' +
-        'Enter 1 or 2:'
-    );
-
-    let targetEmployees = [];
-
-    if (employeeChoice === '1') {
-        targetEmployees = ['all'];
-    } else if (employeeChoice === '2') {
-        // For bulk, use a simpler selection method
-        const employeeList = employees.map((emp, idx) => `${idx + 1}. ${emp.username} (${emp.fullName})`).join('\n');
-        const selectedNumbers = prompt(
-            `Select employees by numbers (comma-separated):\n\n${employeeList}\n\nExample: 1,3,5`
-        );
-
-        if (selectedNumbers) {
-            const numbers = selectedNumbers.split(',').map(n => parseInt(n.trim()) - 1);
-            targetEmployees = numbers
-                .filter(n => n >= 0 && n < employees.length)
-                .map(n => employees[n].username);
-        }
-    }
-
-    if (targetEmployees.length === 0) {
-        alert('No employees selected. Re-assignment cancelled.');
-        return;
-    }
-
-    // Process each selected question
-    let successCount = 0;
-    let failureCount = 0;
-
-    alert(`Starting re-assignment of ${selectedIds.length} questions...`);
-
-    for (let i = 0; i < selectedIds.length; i++) {
-        const questionId = selectedIds[i];
-        const originalQuestion = questions.find(q => q._id === questionId);
-        
-        if (!originalQuestion) {
-            failureCount++;
-            continue;
-        }
-
-        const newQuestionData = {
-            title: originalQuestion.title,
-            standard: originalQuestion.standard,
-            indicatorNumber: originalQuestion.indicatorNumber,
-            practiceNumber: originalQuestion.practiceNumber,
-            questionNumber: originalQuestion.questionNumber,
-            releaseTime: new Date(newReleaseDate),
-            expiryTime: newExpiryDate ? new Date(newExpiryDate) : null,
-            targetEmployees: targetEmployees,
-            createdBy: currentUser.username,
-        };
-
-        try {
-            const response = await fetch(`${API_URL}/questions`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(newQuestionData)
-            });
-
-            if (response.ok) {
-                successCount++;
-                console.log(`✅ Question ${i + 1} re-assigned successfully`);
-            } else {
-                failureCount++;
-                console.error(`❌ Question ${i + 1} failed: ${response.status}`);
-            }
-        } catch (error) {
-            failureCount++;
-            console.error(`❌ Question ${i + 1} error:`, error);
-        }
-
-        // Small delay between requests
-        if (i < selectedIds.length - 1) {
-            await new Promise(resolve => setTimeout(resolve, 300));
-        }
-    }
-
-    // Clear selections
-    selectedCheckboxes.forEach(cb => cb.checked = false);
-    updateBulkActionState();
-
-    // Show results
-    alert(`Re-assignment completed!\n\nSuccessful: ${successCount}\nFailed: ${failureCount}`);
-
-    // Refresh data
-    if (successCount > 0) {
-        await fetchAllData();
-        renderAdminDashboard();
-    }
-}
-async function quickReassignQuestion(questionId) {
-    const question = questions.find(q => q._id === questionId);
-    if (!question) {
-        alert('Question not found.');
-        return;
-    }
-
-    if (!confirm(`Quick re-assign "${question.title}" with current settings?\n\nThis will create a new question with:\n- Release: Now\n- Expiry: Same as original\n- Targets: Same as original`)) {
-        return;
-    }
-
-    const newQuestionData = {
-        title: question.title,
-        standard: question.standard,
-        indicatorNumber: question.indicatorNumber,
-        practiceNumber: question.practiceNumber,
-        questionNumber: question.questionNumber,
-        releaseTime: new Date(), // Now
-        expiryTime: question.expiryTime ? new Date(question.expiryTime) : null,
-        targetEmployees: question.targetEmployees,
-        createdBy: currentUser.username,
-    };
-
-    try {
-        const response = await fetch(`${API_URL}/questions`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(newQuestionData)
-        });
-
-        if (!response.ok) {
-            throw new Error('Failed to quick re-assign question.');
-        }
-
-        alert('Question quickly re-assigned successfully!');
-        
-        await fetchAllData();
-        renderAdminDashboard();
-    } catch (error) {
-        alert(`Error quick re-assigning question: ${error.message}`);
-    }
-}
-// =================================================================
-// --- Bulk Action Functions (Modified) ---
-// =================================================================
-
-function updateBulkActionButtons(bulkActionsBar, selectedCount) {
-    // Find or create the buttons container
-    let buttonsContainer = bulkActionsBar.querySelector('.bulk-action-buttons');
-    if (!buttonsContainer) {
-        buttonsContainer = document.createElement('div');
-        buttonsContainer.className = 'bulk-action-buttons';
-        buttonsContainer.style.display = 'flex';
-        buttonsContainer.style.gap = '10px';
-        bulkActionsBar.appendChild(buttonsContainer);
-    }
-
-    // Clear existing buttons
-    buttonsContainer.innerHTML = '';
-
-    // Add Re-assign button
-    const reassignBtn = document.createElement('button');
-    reassignBtn.className = 'info-btn';
-    reassignBtn.textContent = 'Re-assign Selected';
-    reassignBtn.onclick = reassignSelectedQuestions;
-    reassignBtn.title = `Re-assign ${selectedCount} selected questions`;
-    buttonsContainer.appendChild(reassignBtn);
-
-    // Add Delete button
-    const deleteBtn = document.createElement('button');
-    deleteBtn.className = 'danger-btn';
-    deleteBtn.textContent = 'Delete Selected';
-    deleteBtn.onclick = deleteSelectedQuestions;
-    deleteBtn.title = `Delete ${selectedCount} selected questions`;
-    buttonsContainer.appendChild(deleteBtn);
-}
-
-function updateBulkActionState() {
-    try {
-        const checkboxes = document.querySelectorAll('#questionsList .question-select-checkbox:checked');
-        const selectedCount = checkboxes.length;
-        const bulkActionsBar = document.getElementById('bulkActionsBar');
-        
-        if (!bulkActionsBar) return;
-        
-        if (selectedCount > 0) {
-            bulkActionsBar.classList.remove('hidden');
-            const selectionCountEl = document.getElementById('selectionCount');
-            if (selectionCountEl) {
-                selectionCountEl.textContent = `${selectedCount} selected`;
-            }
-            
-            // Update bulk actions buttons
-            updateBulkActionButtons(bulkActionsBar, selectedCount);
-        } else {
-            bulkActionsBar.classList.add('hidden');
-        }
-
-        const totalCheckboxes = document.querySelectorAll('#questionsList .question-select-checkbox').length;
-        const selectAllCheckbox = document.getElementById('selectAllCheckbox');
-        if (selectAllCheckbox) {
-            selectAllCheckbox.checked = (totalCheckboxes > 0 && selectedCount === totalCheckboxes);
-        }
-        
-        forceHideModal();
-    } catch (error) {
-        console.error('Error in updateBulkActionState:', error);
-    }
-}
-
-function toggleSelectAll(checked) {
-    const checkboxes = document.querySelectorAll('#questionsList .question-select-checkbox');
-    checkboxes.forEach(checkbox => {
-        if (checkbox.checked !== checked) {
-            checkbox.checked = checked;
-        }
-    });
-    updateBulkActionState();
-}
-
+// IMPROVED MULTIPLE DELETE FUNCTION
 async function deleteSelectedQuestions() {
     const selectedCheckboxes = document.querySelectorAll('#questionsList .question-select-checkbox:checked');
     const selectedIds = Array.from(selectedCheckboxes).map(cb => cb.value);
@@ -1121,73 +1552,85 @@ async function deleteSelectedQuestions() {
             console.error('Error refreshing data:', error);
         }
     }
-}async function deleteSelectedQuestionsDebug() {
-    console.log('🔍 Starting debug delete function...');
-    
-    const selectedCheckboxes = document.querySelectorAll('#questionsList .question-select-checkbox:checked');
-    console.log('📋 Selected checkboxes:', selectedCheckboxes.length);
-    
-    const selectedIds = Array.from(selectedCheckboxes).map(cb => cb.value);
-    console.log('🆔 Selected IDs:', selectedIds);
+}
+// =================================================================
+// --- Bulk Action Functions ---
+// =================================================================
 
-    if (selectedIds.length === 0) {
-        alert('Please select at least one question to delete.');
-        return;
-    }
-
-    if (!confirm(`Are you sure you want to delete ${selectedIds.length} selected question(s)?`)) {
-        console.log('❌ User cancelled deletion');
-        return;
-    }
-
-    console.log('✅ User confirmed deletion, proceeding...');
-
-    for (let i = 0; i < selectedIds.length; i++) {
-        const questionId = selectedIds[i];
-        console.log(`🔄 Processing question ${i + 1}/${selectedIds.length}: ${questionId}`);
+function updateBulkActionState() {
+    try {
+        const checkboxes = document.querySelectorAll('#questionsList .question-select-checkbox:checked');
+        const selectedCount = checkboxes.length;
+        const bulkActionsBar = document.getElementById('bulkActionsBar');
         
-        try {
-            const url = `${API_URL}/questions/${questionId}`;
-            console.log('📡 Making request to:', url);
-            
-            const response = await fetch(url, {
-                method: 'DELETE'
-            });
-
-            console.log('📨 Response status:', response.status);
-            console.log('📨 Response ok:', response.ok);
-
-            if (response.ok || response.status === 204) {
-                console.log(`✅ Question ${i + 1} deleted successfully`);
-                alert(`Question ${i + 1} deleted!`);
-            } else {
-                console.log(`❌ Question ${i + 1} failed with status:`, response.status);
-                const errorText = await response.text();
-                console.log('❌ Error details:', errorText);
-                alert(`Question ${i + 1} failed: ${response.status}`);
+        if (!bulkActionsBar) return;
+        
+        if (selectedCount > 0) {
+            bulkActionsBar.classList.remove('hidden');
+            const selectionCountEl = document.getElementById('selectionCount');
+            if (selectionCountEl) {
+                selectionCountEl.textContent = `${selectedCount} selected`;
             }
-        } catch (error) {
-            console.error(`💥 Error with question ${i + 1}:`, error);
-            alert(`Error with question ${i + 1}: ${error.message}`);
+            
+            // Update bulk actions buttons
+            updateBulkActionButtons(bulkActionsBar, selectedCount);
+        } else {
+            bulkActionsBar.classList.add('hidden');
         }
 
-        // Wait between deletions
-        console.log('⏳ Waiting 1 second...');
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        const totalCheckboxes = document.querySelectorAll('#questionsList .question-select-checkbox').length;
+        const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+        if (selectAllCheckbox) {
+            selectAllCheckbox.checked = (totalCheckboxes > 0 && selectedCount === totalCheckboxes);
+        }
+        
+        forceHideModal();
+    } catch (error) {
+        console.error('Error in updateBulkActionState:', error);
+    }
+}
+
+function updateBulkActionButtons(bulkActionsBar, selectedCount) {
+    // Find or create the buttons container
+    let buttonsContainer = bulkActionsBar.querySelector('.bulk-action-buttons');
+    if (!buttonsContainer) {
+        buttonsContainer = document.createElement('div');
+        buttonsContainer.className = 'bulk-action-buttons';
+        buttonsContainer.style.display = 'flex';
+        buttonsContainer.style.gap = '10px';
+        bulkActionsBar.appendChild(buttonsContainer);
     }
 
-    console.log('🏁 Deletion process completed');
-    
-    // Clear selections
-    selectedCheckboxes.forEach(cb => cb.checked = false);
-    updateBulkActionState();
-    
-    // Refresh
-    await fetchAllData();
-    renderAdminDashboard();
-    
-    console.log('🔄 Data refreshed');
+    // Clear existing buttons
+    buttonsContainer.innerHTML = '';
+
+    // Get current language for button text
+    const currentLang = localStorage.getItem('language') || 'en';
+
+    // Add Re-assign button
+    const reassignBtn = document.createElement('button');
+    reassignBtn.className = 'info-btn';
+    reassignBtn.textContent = translations[currentLang].btn_reassign_selected;
+    reassignBtn.onclick = bulkReassignWithCalendar;
+    reassignBtn.title = `Re-assign ${selectedCount} selected questions`;
+    buttonsContainer.appendChild(reassignBtn);
+
+    // Add Delete button
+    const deleteBtn = document.createElement('button');
+    deleteBtn.className = 'danger-btn';
+    deleteBtn.textContent = translations[currentLang].btn_delete_selected;
+    deleteBtn.onclick = deleteSelectedQuestions;
+    deleteBtn.title = `Delete ${selectedCount} selected questions`;
+    buttonsContainer.appendChild(deleteBtn);
 }
+
+function toggleSelectAll(checked) {
+    document.querySelectorAll('#questionsList .question-select-checkbox').forEach(checkbox => {
+        checkbox.checked = checked;
+    });
+    updateBulkActionState();
+}
+
 // =================================================================
 // --- Helper & Utility Functions ---
 // =================================================================
@@ -1278,6 +1721,10 @@ function editProfile() {
         showEmployeeProfile();
     }
 }
+// =================================================================
+// --- Export Functions ---
+// =================================================================
+
 function exportQuestionsToExcel() {
     const data = questions.map(q => ({
         'Question': q.title, 
@@ -1353,4 +1800,13 @@ function exportEmployeesToExcel() {
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Employees");
     XLSX.writeFile(wb, "employees_export.xlsx");
+}
+
+// =================================================================
+// --- LEGACY REASSIGN FUNCTION (FOR BACKWARDS COMPATIBILITY) ---
+// =================================================================
+
+function reassignQuestion(questionId) {
+    // Redirect to calendar-based reassign for better UX
+    reassignQuestionWithCalendar(questionId);
 }
