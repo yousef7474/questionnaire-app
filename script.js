@@ -1,3 +1,5 @@
+--- START OF FILE script.js ---
+
 // The base URL of our new backend server
 const API_URL = 'https://questionnaire-app-xd7f.onrender.com/api';
 
@@ -117,7 +119,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const savedLang = localStorage.getItem('language') || 'en';
     setLanguage(savedLang);
 
-    // PERMANENT MODAL FIX - Force hide modal immediately on page load
+    // PERMANENT MODAL FIX - Force hide modal and related buttons immediately on page load
     forceHideModal();
     
     // Add CSS to force hide the modal
@@ -693,30 +695,6 @@ async function editEmployee(id, currentDepartment) {
     } catch (error) {
         alert(`Error: ${error.message}`);
     }
-}
-
-function reassignQuestion(questionId) {
-    const questionToReassign = questions.find(q => q._id === questionId);
-    if (!questionToReassign) {
-        alert('Error: Question not found.');
-        return;
-    }
-    showMainTab('governance');
-    showSubTab('create');
-    document.getElementById('questionTitle').value = questionToReassign.title;
-    document.getElementById('standard').value = questionToReassign.standard || '';
-    document.getElementById('indicatorNumber').value = questionToReassign.indicatorNumber || '';
-    document.getElementById('practiceNumber').value = questionToReassign.practiceNumber || '';
-    document.getElementById('questionNumber').value = questionToReassign.questionNumber || '';
-    document.getElementById('releaseTime').value = '';
-    document.getElementById('expiryTime').value = '';
-    const targetSelect = document.getElementById('targetEmployees');
-    Array.from(targetSelect.options).forEach(option => {
-        option.selected = questionToReassign.targetEmployees.includes(option.value);
-    });
-    window.scrollTo(0, 0);
-    document.getElementById('questionTitle').focus();
-    alert('Question data has been pre-filled. Please set a new release and expiry date to re-assign.');
 }
 
 // =================================================================
