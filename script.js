@@ -531,7 +531,7 @@ async function submitResponse(event, questionId) {
         submitButton.disabled = true;
         submitButton.textContent = 'Submitting...';
 
-        const answer = document.querySelector(`input[name="answer_${questionId}"]:checked`).value;
+        const answer = document.querySelector(`input[name="answer_${q._id}"]:checked`).value;
         const fileInput = document.getElementById(`attachment_${questionId}`);
         const urlInput = document.getElementById(`url_${questionId}`);
         
@@ -548,6 +548,7 @@ async function submitResponse(event, questionId) {
             formData.append('file', file);
             formData.append('upload_preset', config.uploadPreset);
             let uploadUrl = `https://api.cloudinary.com/v1_1/${config.cloudName}/raw/upload`;
+            // All non-image files are uploaded as 'raw'
             if (!file.type.startsWith('image/')) {
                 formData.append('resource_type', 'raw');
             }
@@ -557,10 +558,12 @@ async function submitResponse(event, questionId) {
                 throw new Error(`File upload failed: ${cloudinaryRes.status}`);
             }
             const cloudinaryData = await cloudinaryRes.json();
+            
             let finalUrl = cloudinaryData.secure_url;
-            // THIS IS THE FIX: Add fl_attachment if it's not an image, especially for PDFs
-            if (!file.type.startsWith('image/')) {
-                 finalUrl = finalUrl.replace('/upload/', '/upload/fl_attachment/');
+            // THIS IS THE FIX: Only for non-image files, change the URL structure
+            if (cloudinaryData.resource_type === 'raw') {
+                 // Replace /raw/upload with /image/upload and add fl_attachment
+                 finalUrl = finalUrl.replace('/raw/upload', '/image/upload/fl_attachment');
             }
             attachmentUrl = finalUrl;
         }
