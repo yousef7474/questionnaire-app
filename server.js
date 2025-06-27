@@ -15,7 +15,7 @@ const PORT = process.env.PORT || 3000;
 const MONGO_URI = process.env.MONGO_URI;
 
 // --- Middleware ---
-app.use(cors()); // Using a simpler CORS setup for now
+app.use(cors());
 app.use(express.json());
 app.use(express.static(__dirname));
 
@@ -72,34 +72,47 @@ const Response = mongoose.model('Response', ResponseSchema);
 // --- API ROUTES ---
 // =================================================================
 
-// NEW FILE UPLOAD ENDPOINT
+// ROBUST FILE UPLOAD ENDPOINT using Imgur
 app.post('/api/upload', upload.single('file'), async (req, res) => {
     if (!req.file) {
         return res.status(400).json({ message: 'No file uploaded.' });
     }
+    
+    const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID;
+    if (!IMGUR_CLIENT_ID) {
+        console.error("CRITICAL: Imgur Client ID is not set in environment variables.");
+        return res.status(500).json({ message: "Server configuration error: Image hosting is not configured." });
+    }
 
     try {
         const form = new FormData();
-        form.append('file', req.file.buffer, { filename: req.file.originalname });
+        // Imgur API expects the file buffer under the key 'image' for all file types
+        form.append('image', req.file.buffer);
+        form.append('type', 'file'); // Specify the upload type
+        form.append('name', req.file.originalname); // Keep original filename
+        form.append('title', `Questionnaire Upload - ${req.file.originalname}`);
 
-        const fileioResponse = await fetch('https://file.io', {
+        const imgurResponse = await fetch('https://api.imgur.com/3/upload', { // Use /3/upload endpoint
             method: 'POST',
+            headers: {
+                'Authorization': `Client-ID ${IMGUR_CLIENT_ID}`,
+                ...form.getHeaders()
+            },
             body: form
         });
 
-        if (!fileioResponse.ok) {
-            throw new Error(`File.io server responded with ${fileioResponse.status}`);
+        const imgurData = await imgurResponse.json();
+
+        if (!imgurResponse.ok || !imgurData.success) {
+            const errorMessage = imgurData.data.error.message || `Imgur server responded with ${imgurResponse.status}`;
+            throw new Error(errorMessage);
         }
 
-        const fileioData = await fileioResponse.json();
+        console.log(`File uploaded successfully to Imgur: ${imgurData.data.link}`);
+        res.json({ success: true, link: imgurData.data.link });
 
-        if (!fileioData.success) {
-            throw new Error(fileioData.message || 'File.io upload failed');
-        }
-
-        res.json({ success: true, link: fileioData.link });
     } catch (error) {
-        console.error('Error during file upload to File.io:', error);
+        console.error('Error during file upload to Imgur:', error);
         res.status(500).json({ message: `Upload failed: ${error.message}` });
     }
 });
