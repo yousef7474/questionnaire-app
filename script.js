@@ -89,18 +89,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // Event listener for the new re-assign modal form
     document.getElementById('reassignForm').addEventListener('submit', handleReassignSubmit);
 
-    // THE FIX: Add Escape key listener to close modal
+    // Add Escape key listener to close modal
     document.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape' || event.key === 'Esc') {
-        const modal = document.getElementById('reassignModal');
-        // Check if the modal is currently visible before trying to close it
-        if (!modal.classList.contains('hidden')) {
-            event.preventDefault(); // Prevent default escape behavior
-            closeReassignModal();
+        if (event.key === 'Escape' || event.key === 'Esc') {
+            const modal = document.getElementById('reassignModal');
+            if (!modal.classList.contains('hidden')) {
+                closeReassignModal();
+            }
         }
-    }
-   });
-
+    });
 
     checkLoginStatus();
 });
@@ -739,7 +736,6 @@ function reassignSelectedModal() {
     const modal = document.getElementById('reassignModal');
     const select = document.getElementById('reassignTargetEmployees');
     
-    // Clear and populate the select
     select.innerHTML = '<option value="all">All Employees</option>';
     employees.forEach(emp => {
         const option = document.createElement('option');
@@ -750,33 +746,18 @@ function reassignSelectedModal() {
 
     document.getElementById('reassignCount').textContent = selectedIds.length;
     modal.classList.remove('hidden');
-    
-    // Focus on the first input for better UX
-    setTimeout(() => {
-        document.getElementById('reassignReleaseTime').focus();
-    }, 100);
 }
 
 function closeReassignModal() {
-    console.log('Attempting to close modal...'); // Debug log
     const modal = document.getElementById('reassignModal');
     if (modal) {
         modal.classList.add('hidden');
-        modal.style.display = 'none'; // Force hide with inline style
     }
     
-    // Reset the form
     const form = document.getElementById('reassignForm');
     if (form) {
         form.reset();
     }
-    
-    // Clear any selected checkboxes
-    document.querySelectorAll('#questionsList .question-select-checkbox:checked').forEach(checkbox => {
-        checkbox.checked = false;
-    });
-    updateBulkActionState();
-    console.log('Modal should be closed now'); // Debug log
 }
 
 async function handleReassignSubmit(e) {
@@ -836,10 +817,7 @@ async function handleReassignSubmit(e) {
 // --- Helper & Utility Functions ---
 // =================================================================
 
-// THE FIX: New function to handle closing the modal by clicking the background
 function handleOverlayClick(event) {
-    // Close the modal only if the user clicks on the overlay div itself,
-    // and not on the content box inside it.
     if (event.target === event.currentTarget) {
         closeReassignModal();
     }
