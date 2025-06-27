@@ -60,16 +60,12 @@ const translations = {
     }
 };
 
+// THIS FUNCTION IS NOW FIXED TO HANDLE ALL TRANSLATIONS
 function setLanguage(lang) {
     document.querySelectorAll('[data-translate]').forEach(el => {
         const key = el.getAttribute('data-translate');
         if (translations[lang] && translations[lang][key]) {
-            // For radio buttons, we set the text content of the span inside the label
-            if (el.tagName === 'SPAN' && el.parentElement.tagName === 'LABEL') {
-                el.textContent = translations[lang][key];
-            } else {
-                 el.textContent = translations[lang][key];
-            }
+            el.textContent = translations[lang][key];
         }
     });
     document.querySelectorAll('[data-translate-placeholder]').forEach(el => {
@@ -237,10 +233,13 @@ function renderAdminDashboard() {
     loadEmployeeOptions();
 }
 
-// THIS FUNCTION IS NOW FIXED
 function renderEmployeeDashboard() {
-    const filterValue = document.querySelector('input[name="employeeQuestionFilter"]:checked')?.value || 'all';
-    loadEmployeeQuestions(filterValue); 
+    // Reset the filter to 'all' whenever the employee dashboard is rendered from scratch
+    const allRadio = document.querySelector('input[name="employeeQuestionFilter"][value="all"]');
+    if (allRadio) {
+        allRadio.checked = true;
+    }
+    loadEmployeeQuestions('all'); 
 }
 
 
@@ -514,6 +513,7 @@ document.getElementById('questionForm').addEventListener('submit', async functio
     }
 });
 
+// THIS FUNCTION IS NOW FIXED
 async function submitResponse(event, questionId) {
     event.preventDefault();
 
@@ -533,44 +533,29 @@ async function submitResponse(event, questionId) {
 
         if (fileInput.files.length > 0) {
             submitButton.textContent = 'Uploading file...';
-            
             const file = fileInput.files[0];
             const config = await getCloudinaryConfig();
-            
             if (!config || !config.cloudName || !config.uploadPreset) {
                 throw new Error("Cloudinary configuration is missing. Cannot upload file.");
             }
-
             const formData = new FormData();
             formData.append('file', file);
             formData.append('upload_preset', config.uploadPreset);
-
             let uploadUrl = `https://api.cloudinary.com/v1_1/${config.cloudName}/raw/upload`;
-            
             if (!file.type.startsWith('image/')) {
                 formData.append('resource_type', 'raw');
                 formData.append('flags', 'attachment');
             }
-
-            const cloudinaryRes = await fetch(uploadUrl, {
-                method: 'POST',
-                body: formData,
-            });
-
+            const cloudinaryRes = await fetch(uploadUrl, { method: 'POST', body: formData });
             if (!cloudinaryRes.ok) {
                 const errorText = await cloudinaryRes.text();
-                console.error('Cloudinary upload error:', errorText);
                 throw new Error(`File upload failed: ${cloudinaryRes.status}`);
             }
-
             const cloudinaryData = await cloudinaryRes.json();
-            
             let finalUrl = cloudinaryData.secure_url;
-            
             if (file.type === 'application/pdf') {
                 finalUrl = finalUrl.replace('/upload/', '/upload/fl_attachment/');
             }
-            
             attachmentUrl = finalUrl;
         }
 
@@ -592,10 +577,11 @@ async function submitResponse(event, questionId) {
 
         if (!res.ok) throw new Error('Failed to submit response to our server.');
 
-        // Instead of just pushing, re-fetch all data to get the latest state
-        await fetchAllData();
+        // This is the corrected flow:
         alert('Response submitted successfully!');
-        // Re-render the dashboard with the new data and the current filter
+        // 1. Get the latest data from the server, including the new response.
+        await fetchAllData();
+        // 2. Re-render the list, respecting the user's currently selected filter.
         filterEmployeeQuestions();
 
     } catch (error) {
@@ -699,7 +685,6 @@ function filterResponses() {
     loadResponses(filterValue);
 }
 
-// THIS FUNCTION IS NOW FIXED
 function filterEmployeeQuestions() {
     const filterValue = document.querySelector('input[name="employeeQuestionFilter"]:checked').value;
     loadEmployeeQuestions(filterValue);
