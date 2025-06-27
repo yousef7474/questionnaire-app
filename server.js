@@ -44,15 +44,12 @@ const EmployeeSchema = new mongoose.Schema({
 });
 const Employee = mongoose.model('Employee', EmployeeSchema);
 
-// --- UPDATED QuestionSchema ---
 const QuestionSchema = new mongoose.Schema({
     title: { type: String, required: true },
-    // --- NEW FIELDS ---
-    standard: { type: String },       // المعيار
-    indicatorNumber: { type: String }, // رقم المؤشر
-    practiceNumber: { type: String },  // رقم الممارسة
-    questionNumber: { type: String },  // رقم السؤال
-    // --- END NEW FIELDS ---
+    standard: { type: String },
+    indicatorNumber: { type: String },
+    practiceNumber: { type: String },
+    questionNumber: { type: String },
     releaseTime: { type: Date, required: true },
     expiryTime: { type: Date },
     targetEmployees: [String],
@@ -103,24 +100,50 @@ app.post('/api/employees/register', async (req, res) => {
     } catch (err) { res.status(400).json({ message: err.message }); }
 });
 
+// THIS IS THE CORRECTED, SECURE LOGIN ENDPOINT
 app.post('/api/employees/login', async (req, res) => {
     try {
         const { username, password, role } = req.body;
-        if (role === 'employee') {
+
+        if (role === 'admin') {
+            // Securely check admin credentials from environment variables
+            const adminUser = process.env.ADMIN_USERNAME;
+            const adminPass = process.env.ADMIN_PASSWORD;
+
+            if (!adminUser || !adminPass) {
+                // Fail-safe if environment variables are not set
+                console.error("CRITICAL: Admin credentials are not set in environment variables.");
+                return res.status(500).json({ message: "Server configuration error." });
+            }
+
+            if (username === adminUser && password === adminPass) {
+                // Admin login successful
+                console.log(`Admin user "${username}" logged in successfully.`);
+                res.json({ username: username, role: 'admin' });
+            } else {
+                // Admin login failed
+                console.warn(`Failed admin login attempt for user "${username}".`);
+                return res.status(401).json({ message: "Invalid admin username or password." });
+            }
+        } else if (role === 'employee') {
+            // Check employee credentials from the database
             const employee = await Employee.findOne({ username: username });
             if (!employee || employee.password !== password) {
-                return res.status(404).json({ message: "Invalid username or password." });
+                return res.status(401).json({ message: "Invalid employee username or password." });
             }
             const employeeData = employee.toObject();
-            delete employeeData.password;
+            delete employeeData.password; // Never send the password back to the client
             res.json({ ...employeeData, role: 'employee' });
-        } else if (role === 'admin') {
-            res.json({ username: username, role: 'admin' });
         } else {
-            res.status(400).json({ message: "Invalid role." });
+            // Invalid role
+            res.status(400).json({ message: "Invalid role specified." });
         }
-    } catch (err) { res.status(500).json({ message: err.message }); }
+    } catch (err) { 
+        console.error("Login endpoint error:", err);
+        res.status(500).json({ message: err.message }); 
+    }
 });
+
 
 app.put('/api/employees/:id', async (req, res) => {
     try {
