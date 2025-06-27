@@ -519,6 +519,7 @@ document.getElementById('questionForm').addEventListener('submit', async functio
     }
 });
 
+// THIS FUNCTION IS NOW FIXED
 async function submitResponse(event, questionId) {
     event.preventDefault();
 
@@ -549,7 +550,6 @@ async function submitResponse(event, questionId) {
             let uploadUrl = `https://api.cloudinary.com/v1_1/${config.cloudName}/raw/upload`;
             if (!file.type.startsWith('image/')) {
                 formData.append('resource_type', 'raw');
-                formData.append('flags', 'attachment');
             }
             const cloudinaryRes = await fetch(uploadUrl, { method: 'POST', body: formData });
             if (!cloudinaryRes.ok) {
@@ -558,8 +558,9 @@ async function submitResponse(event, questionId) {
             }
             const cloudinaryData = await cloudinaryRes.json();
             let finalUrl = cloudinaryData.secure_url;
-            if (file.type === 'application/pdf') {
-                finalUrl = finalUrl.replace('/upload/', '/upload/fl_attachment/');
+            // THIS IS THE FIX: Add fl_attachment if it's not an image, especially for PDFs
+            if (!file.type.startsWith('image/')) {
+                 finalUrl = finalUrl.replace('/upload/', '/upload/fl_attachment/');
             }
             attachmentUrl = finalUrl;
         }
