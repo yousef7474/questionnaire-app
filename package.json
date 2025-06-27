@@ -16,7 +16,8 @@
     "mongodb": "^6.17.0",
     "mongoose": "^8.16.0",
     "multer": "^2.0.1",
-    "node-cron": "^4.1.1"
+    "node-cron": "^4.1.1",
+    "node-fetch": "^2.7.0"
   },
   "devDependencies": {
     "dotenv": "^16.5.0"
