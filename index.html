@@ -97,10 +97,15 @@
                     <label data-translate="label_question_title">Question Title:</label>
                     <input type="text" id="questionTitle" data-translate-placeholder="question_title_placeholder" placeholder="Enter your question" required>
                     
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
+                    <div class="question-details-form-grid">
                         <div>
                             <label>المعيار (Standard):</label>
-                            <input type="text" id="standard" placeholder="e.g., 2.1">
+                            <select id="standard" required>
+                                <option value="" disabled selected>اختر المعيار</option>
+                                <option value="الإمتثال والإلتزام">الإمتثال والإلتزام</option>
+                                <option value="الشفافية والإفصاح">الشفافية والإفصاح</option>
+                                <option value="السلامة المالية">السلامة المالية</option>
+                            </select>
                         </div>
                         <div>
                             <label>رقم المؤشر (Indicator No.):</label>
@@ -150,6 +155,16 @@
                 <h3 data-translate="manage_questions_title">Manage Questions</h3>
                 <button class="info-btn" onclick="exportQuestionsToExcel()" data-translate="export_excel_btn">Export to Excel</button>
             </div>
+            <!-- NEW: Filter Section -->
+            <div class="filter-section">
+                <label for="questionFilterStandard">تصفية حسب المعيار:</label>
+                <select id="questionFilterStandard" onchange="filterQuestions()">
+                    <option value="all">جميع المعايير</option>
+                    <option value="الإمتثال والإلتزام">الإمتثال والإلتزام</option>
+                    <option value="الشفافية والإفصاح">الشفافية والإفصاح</option>
+                    <option value="السلامة المالية">السلامة المالية</option>
+                </select>
+            </div>
             <div id="questionsList"></div>
         </div>
 
@@ -159,7 +174,6 @@
                 <h3 data-translate="employee_responses_title">Employee Responses</h3>
                 <button class="info-btn" onclick="exportAllResponsesToExcel()" data-translate="export_all_responses_btn">Export All Responses to Excel</button>
             </div>
-            <!-- THIS IS THE CORRECTED LINE -->
             <div id="responsesByEmployeeList"></div>
         </div>
 
