@@ -9,24 +9,6 @@ let questions = [];
 let responses = [];
 let employees = [];
 
-// This will hold our Cloudinary configuration
-let cloudinaryConfig = null;
-
-// Helper function to fetch Cloudinary config from our server
-async function getCloudinaryConfig() {
-    if (!cloudinaryConfig) {
-        try {
-            const res = await fetch(`${API_URL}/config/cloudinary`);
-            if (!res.ok) throw new Error('Failed to fetch Cloudinary config.');
-            cloudinaryConfig = await res.json();
-        } catch (error) {
-            console.error("Could not fetch Cloudinary config", error);
-        }
-    }
-    return cloudinaryConfig;
-}
-
-
 // =================================================================
 // --- Theme & Language Logic ---
 // =================================================================
@@ -519,7 +501,7 @@ document.getElementById('questionForm').addEventListener('submit', async functio
     }
 });
 
-// THIS FUNCTION IS NOW FIXED
+// THIS FUNCTION IS NOW FIXED FOR FILE.IO
 async function submitResponse(event, questionId) {
     event.preventDefault();
 
@@ -531,7 +513,7 @@ async function submitResponse(event, questionId) {
         submitButton.disabled = true;
         submitButton.textContent = 'Submitting...';
 
-        const answer = document.querySelector(`input[name="answer_${q._id}"]:checked`).value;
+        const answer = document.querySelector(`input[name="answer_${questionId}"]:checked`).value;
         const fileInput = document.getElementById(`attachment_${questionId}`);
         const urlInput = document.getElementById(`url_${questionId}`);
         
@@ -540,32 +522,29 @@ async function submitResponse(event, questionId) {
         if (fileInput.files.length > 0) {
             submitButton.textContent = 'Uploading file...';
             const file = fileInput.files[0];
-            const config = await getCloudinaryConfig();
-            if (!config || !config.cloudName || !config.uploadPreset) {
-                throw new Error("Cloudinary configuration is missing. Cannot upload file.");
-            }
+            
             const formData = new FormData();
             formData.append('file', file);
-            formData.append('upload_preset', config.uploadPreset);
-            let uploadUrl = `https://api.cloudinary.com/v1_1/${config.cloudName}/raw/upload`;
-            // All non-image files are uploaded as 'raw'
-            if (!file.type.startsWith('image/')) {
-                formData.append('resource_type', 'raw');
+
+            // Use File.io for simple, anonymous file hosting
+            const fileioRes = await fetch('https://file.io', {
+                method: 'POST',
+                body: formData,
+            });
+
+            if (!fileioRes.ok) {
+                const errorText = await fileioRes.text();
+                console.error('File.io upload error:', errorText);
+                throw new Error(`File upload failed: ${fileioRes.status}`);
             }
-            const cloudinaryRes = await fetch(uploadUrl, { method: 'POST', body: formData });
-            if (!cloudinaryRes.ok) {
-                const errorText = await cloudinaryRes.text();
-                throw new Error(`File upload failed: ${cloudinaryRes.status}`);
+
+            const fileioData = await fileioRes.json();
+            if (!fileioData.success) {
+                 throw new Error(`File.io reported an error: ${fileioData.message}`);
             }
-            const cloudinaryData = await cloudinaryRes.json();
             
-            let finalUrl = cloudinaryData.secure_url;
-            // THIS IS THE FIX: Only for non-image files, change the URL structure
-            if (cloudinaryData.resource_type === 'raw') {
-                 // Replace /raw/upload with /image/upload and add fl_attachment
-                 finalUrl = finalUrl.replace('/raw/upload', '/image/upload/fl_attachment');
-            }
-            attachmentUrl = finalUrl;
+            // The direct link to the file
+            attachmentUrl = fileioData.link;
         }
 
         submitButton.textContent = 'Saving response...';
