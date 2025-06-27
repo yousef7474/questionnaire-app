@@ -166,6 +166,7 @@
                             <span id="selectionCount" style="margin-left: 15px; color: var(--text-secondary);">0 selected</span>
                         </div>
                         <div>
+                            <button class="info-btn" onclick="reassignSelectedModal()">Re-assign Selected</button>
                             <button class="danger-btn" onclick="deleteSelectedQuestions()">Delete Selected</button>
                         </div>
                     </div>
@@ -298,7 +299,29 @@
         <div id="employeeQuestions"></div>
     </div>
 
-    <!-- The Re-assign Modal has been removed as the feature is incomplete and was causing critical bugs. -->
+    <!-- NEW: Re-assign Modal -->
+    <!-- THE FIX: Added onclick="handleOverlayClick(event)" to the overlay -->
+    <div id="reassignModal" class="modal-overlay hidden" onclick="handleOverlayClick(event)">
+        <div class="modal-content">
+            <h3>Re-assign Selected Questions</h3>
+            <p>Set new details for the <span id="reassignCount"></span> selected questions. New questions will be created based on the originals.</p>
+            <form id="reassignForm">
+                <label>New Release Date & Time:</label>
+                <input type="datetime-local" id="reassignReleaseTime" required>
+                
+                <label>New Expiry Date & Time (Optional):</label>
+                <input type="datetime-local" id="reassignExpiryTime">
+                
+                <label>New Target Employees:</label>
+                <select id="reassignTargetEmployees" multiple required style="height: 100px;"></select>
+                
+                <div style="margin-top: 20px; display: flex; justify-content: flex-end; gap: 10px;">
+                    <button type="button" class="info-btn" onclick="closeReassignModal()">Cancel</button>
+                    <button type="submit" class="secondary-btn">Confirm Re-assign</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <!-- Include XLSX library for Excel export -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>

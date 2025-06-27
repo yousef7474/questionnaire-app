@@ -1,3 +1,5 @@
+--- START OF FILE server.js ---
+
 // This MUST be the very first line to ensure all environment variables are loaded
 require('dotenv').config();
 
