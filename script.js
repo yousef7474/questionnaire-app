@@ -70,6 +70,43 @@ function setLanguage(lang) {
 }
 
 // =================================================================
+// --- PERMANENT MODAL FIX - Prevent Modal from Showing ---
+// =================================================================
+
+function forceHideModal() {
+    const modal = document.getElementById('reassignModal');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.style.display = 'none !important';
+        modal.style.visibility = 'hidden';
+        modal.style.opacity = '0';
+        modal.style.pointerEvents = 'none';
+    }
+}
+
+// Override all modal-related functions to prevent modal from showing
+function reassignSelectedModal() {
+    console.log('Reassign modal is permanently disabled');
+    return false;
+}
+
+function closeReassignModal() {
+    forceHideModal();
+    return false;
+}
+
+function handleOverlayClick() {
+    return false;
+}
+
+function handleReassignSubmit(e) {
+    if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+    return false;
+}
+// =================================================================
 // --- Page Load & Session Management ---
 // =================================================================
 
@@ -80,22 +117,46 @@ document.addEventListener('DOMContentLoaded', () => {
     const savedLang = localStorage.getItem('language') || 'en';
     setLanguage(savedLang);
 
+    // PERMANENT MODAL FIX - Force hide modal immediately on page load
+    forceHideModal();
+    
+    // Add CSS to force hide the modal
+    const style = document.createElement('style');
+    style.textContent = `
+        #reassignModal {
+            display: none !important;
+            visibility: hidden !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
+        }
+        
+        button[onclick*="reassignSelectedModal"],
+        button[onclick*="reassignQuestion"] {
+            display: none !important;
+        }
+    `;
+    document.head.appendChild(style);
+
+    // Hide reassign buttons after a short delay
+    setTimeout(() => {
+        document.querySelectorAll('button[onclick*="reassignSelectedModal"]').forEach(btn => {
+            btn.style.display = 'none';
+        });
+        
+        document.querySelectorAll('button[onclick*="reassignQuestion"]').forEach(btn => {
+            btn.style.display = 'none';
+        });
+        
+        document.querySelectorAll('button').forEach(btn => {
+            if (btn.textContent.includes('Re-assign') || btn.textContent.includes('reassign')) {
+                btn.style.display = 'none';
+            }
+        });
+    }, 500);
+
     document.body.addEventListener('click', function(event) {
         if (event.target.id === 'themeToggle' || event.target.id === 'employeeThemeToggle') {
             toggleTheme();
-        }
-    });
-
-    // Event listener for the new re-assign modal form
-    document.getElementById('reassignForm').addEventListener('submit', handleReassignSubmit);
-
-    // Add Escape key listener to close modal
-    document.addEventListener('keydown', (event) => {
-        if (event.key === 'Escape' || event.key === 'Esc') {
-            const modal = document.getElementById('reassignModal');
-            if (!modal.classList.contains('hidden')) {
-                closeReassignModal();
-            }
         }
     });
 
@@ -120,7 +181,6 @@ async function checkLoginStatus() {
         }
     }
 }
-
 
 // =================================================================
 // --- Authentication & Initialization ---
@@ -217,7 +277,6 @@ async function fetchAllData() {
         alert("Could not connect to the server. Please ensure the server is running and accessible.");
     }
 }
-
 // =================================================================
 // --- UI Rendering Functions ---
 // =================================================================
@@ -264,7 +323,6 @@ function updateStats() {
     const pendingResponses = Math.max(0, expectedResponses - respondedCount);
     document.getElementById('pendingResponses').textContent = pendingResponses;
 }
-
 
 function getQuestionDetailsHtml(question) {
     if (!question) return '';
@@ -319,14 +377,13 @@ function loadQuestions(filterStandard = 'all') {
             <p><strong>Target:</strong> ${q.targetEmployees.join(', ')}</p>
             <p><strong>Responses:</strong> ${responseCount} / ${targetCount}</p>
             <div style="margin-top: 15px; display: flex; gap: 10px;">
-                <button class="secondary-btn" onclick="reassignQuestion('${q._id}')">Re-assign</button>
                 <button class="danger-btn" onclick="deleteQuestion('${q._id}')">Delete</button>
             </div>
         `;
         questionsList.appendChild(card);
     });
 
-    updateBulkActionState(); // Reset state on load/filter
+    updateBulkActionState();
 }
 
 function loadEmployees() {
@@ -340,7 +397,6 @@ function loadEmployees() {
         employeesList.appendChild(card);
     });
 }
-
 function loadResponses(filterStandard = 'all') {
     const responsesList = document.getElementById('responsesByEmployeeList');
     responsesList.innerHTML = '';
@@ -419,7 +475,6 @@ function loadResponses(filterStandard = 'all') {
     }
 }
 
-
 function loadEmployeeQuestions(filter = 'all') {
     const employeeQuestionsDiv = document.getElementById('employeeQuestions');
     employeeQuestionsDiv.innerHTML = '';
@@ -484,7 +539,6 @@ function loadEmployeeQuestions(filter = 'all') {
     setLanguage(localStorage.getItem('language') || 'en');
 }
 
-
 // =================================================================
 // --- Actions (Functions that send data TO the server) ---
 // =================================================================
@@ -543,7 +597,6 @@ async function submitResponse(event, questionId) {
             const formData = new FormData();
             formData.append('file', file);
 
-            // Upload to our own backend, which will then send to File.io
             const uploadRes = await fetch(`${API_URL}/upload`, {
                 method: 'POST',
                 body: formData,
@@ -587,7 +640,6 @@ async function submitResponse(event, questionId) {
         submitButton.textContent = originalButtonText;
     }
 }
-
 async function deleteQuestion(id) {
     if (!confirm('Are you sure you want to delete this question and all its associated responses?')) return;
     try {
@@ -668,7 +720,7 @@ function reassignQuestion(questionId) {
 }
 
 // =================================================================
-// --- NEW: Bulk Action Functions ---
+// --- Bulk Action Functions (Modified) ---
 // =================================================================
 
 function updateBulkActionState() {
@@ -679,12 +731,21 @@ function updateBulkActionState() {
     if (selectedCount > 0) {
         bulkActionsBar.classList.remove('hidden');
         document.getElementById('selectionCount').textContent = `${selectedCount} selected`;
+        
+        // Hide the reassign button in the bulk actions bar
+        const reassignBtn = bulkActionsBar.querySelector('button[onclick*="reassignSelectedModal"]');
+        if (reassignBtn) {
+            reassignBtn.style.display = 'none';
+        }
     } else {
         bulkActionsBar.classList.add('hidden');
     }
 
     const totalCheckboxes = document.querySelectorAll('#questionsList .question-select-checkbox').length;
     document.getElementById('selectAllCheckbox').checked = (totalCheckboxes > 0 && selectedCount === totalCheckboxes);
+    
+    // Force hide modal if it's somehow visible
+    forceHideModal();
 }
 
 function toggleSelectAll(checked) {
@@ -725,103 +786,9 @@ async function deleteSelectedQuestions() {
         alert(`Error: ${error.message}`);
     }
 }
-
-function reassignSelectedModal() {
-    const selectedIds = Array.from(document.querySelectorAll('#questionsList .question-select-checkbox:checked')).map(cb => cb.value);
-    if (selectedIds.length === 0) {
-        alert('Please select at least one question to re-assign.');
-        return;
-    }
-
-    const modal = document.getElementById('reassignModal');
-    const select = document.getElementById('reassignTargetEmployees');
-    
-    select.innerHTML = '<option value="all">All Employees</option>';
-    employees.forEach(emp => {
-        const option = document.createElement('option');
-        option.value = emp.username;
-        option.textContent = `${emp.fullName} (${emp.department || 'No Dept'})`;
-        select.appendChild(option);
-    });
-
-    document.getElementById('reassignCount').textContent = selectedIds.length;
-    modal.classList.remove('hidden');
-}
-
-function closeReassignModal() {
-    const modal = document.getElementById('reassignModal');
-    if (modal) {
-        modal.classList.add('hidden');
-    }
-    
-    const form = document.getElementById('reassignForm');
-    if (form) {
-        form.reset();
-    }
-}
-
-async function handleReassignSubmit(e) {
-    e.preventDefault();
-    const selectedIds = Array.from(document.querySelectorAll('#questionsList .question-select-checkbox:checked')).map(cb => cb.value);
-    if (selectedIds.length === 0) {
-        closeReassignModal();
-        return;
-    }
-
-    const releaseTime = new Date(document.getElementById('reassignReleaseTime').value);
-    const expiryTime = document.getElementById('reassignExpiryTime').value ? new Date(document.getElementById('reassignExpiryTime').value) : null;
-    const targetEmployees = Array.from(document.getElementById('reassignTargetEmployees').selectedOptions).map(option => option.value);
-
-    const creationPromises = selectedIds.map(id => {
-        const originalQuestion = questions.find(q => q._id === id);
-        if (!originalQuestion) return Promise.resolve(null);
-
-        const newQuestionData = {
-            title: originalQuestion.title,
-            standard: originalQuestion.standard,
-            indicatorNumber: originalQuestion.indicatorNumber,
-            practiceNumber: originalQuestion.practiceNumber,
-            questionNumber: originalQuestion.questionNumber,
-            releaseTime,
-            expiryTime,
-            targetEmployees,
-            createdBy: currentUser.username,
-        };
-
-        return fetch(`${API_URL}/questions`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(newQuestionData)
-        });
-    });
-
-    try {
-        const results = await Promise.all(creationPromises);
-        const failedCount = results.filter(res => res === null || !res.ok).length;
-
-        if (failedCount > 0) {
-            alert(`Successfully re-assigned ${selectedIds.length - failedCount} question(s). ${failedCount} failed.`);
-        } else {
-            alert(`Successfully re-assigned all ${selectedIds.length} question(s).`);
-        }
-        
-        closeReassignModal();
-        await fetchAllData();
-        renderAdminDashboard();
-    } catch (error) {
-        alert(`An error occurred during re-assignment: ${error.message}`);
-    }
-}
-
 // =================================================================
 // --- Helper & Utility Functions ---
 // =================================================================
-
-function handleOverlayClick(event) {
-    if (event.target === event.currentTarget) {
-        closeReassignModal();
-    }
-}
 
 function filterQuestions() {
     const filterValue = document.getElementById('questionFilterStandard').value;
@@ -838,8 +805,15 @@ function filterEmployeeQuestions() {
     loadEmployeeQuestions(filterValue);
 }
 
-function showRegister() { document.getElementById('loginScreen').classList.add('hidden'); document.getElementById('registerScreen').classList.remove('hidden'); }
-function showLogin() { document.getElementById('registerScreen').classList.add('hidden'); document.getElementById('loginScreen').classList.remove('hidden'); }
+function showRegister() { 
+    document.getElementById('loginScreen').classList.add('hidden'); 
+    document.getElementById('registerScreen').classList.remove('hidden'); 
+}
+
+function showLogin() { 
+    document.getElementById('registerScreen').classList.add('hidden'); 
+    document.getElementById('loginScreen').classList.remove('hidden'); 
+}
 
 function logout() {
     localStorage.removeItem('currentUser');
@@ -866,10 +840,9 @@ function showSubTab(tabName) {
     document.getElementById(`${tabName}SubTab`).classList.remove('hidden');
     document.querySelector(`.sub-tab[onclick="showSubTab('${tabName}')"]`).classList.add('active');
     if(tabName === 'manage'){
-        updateBulkActionState(); // Hide bulk bar when switching to this tab
+        updateBulkActionState();
     }
 }
-
 
 function loadEmployeeOptions() {
     const select = document.getElementById('targetEmployees');
@@ -903,10 +876,16 @@ function editProfile() {
         showEmployeeProfile();
     }
 }
-
 function exportQuestionsToExcel() {
     const data = questions.map(q => ({
-        'Question': q.title, 'Release Date': new Date(q.releaseTime).toLocaleString(), 'Expiry Date': q.expiryTime ? new Date(q.expiryTime).toLocaleString() : 'No expiry', 'Target': q.targetEmployees.join(', '), 'Status': 'N/A', 'Responses': responses.filter(r => r.questionId === q._id).length, 'Created By': q.createdBy, 'Created At': new Date(q.createdAt).toLocaleString()
+        'Question': q.title, 
+        'Release Date': new Date(q.releaseTime).toLocaleString(), 
+        'Expiry Date': q.expiryTime ? new Date(q.expiryTime).toLocaleString() : 'No expiry', 
+        'Target': q.targetEmployees.join(', '), 
+        'Status': 'N/A', 
+        'Responses': responses.filter(r => r.questionId === q._id).length, 
+        'Created By': q.createdBy, 
+        'Created At': new Date(q.createdAt).toLocaleString()
     }));
     const ws = XLSX.utils.json_to_sheet(data);
     const wb = XLSX.utils.book_new();
@@ -920,7 +899,13 @@ function exportAllResponsesToExcel() {
         const question = questions.find(q => q._id === r.questionId);
         const employee = employees.find(e => e.username === r.employeeUsername);
         data.push({
-            'Question': question ? question.title : 'N/A', 'Employee Name': r.employeeFullName || r.employeeUsername, 'Employee Email': employee ? employee.email : 'N/A', 'Department': employee ? employee.department : 'N/A', 'Answer': r.answer, 'Has Attachment': r.attachmentUrl ? 'Yes' : 'No', 'Submitted At': new Date(r.submittedAt).toLocaleString()
+            'Question': question ? question.title : 'N/A', 
+            'Employee Name': r.employeeFullName || r.employeeUsername, 
+            'Employee Email': employee ? employee.email : 'N/A', 
+            'Department': employee ? employee.department : 'N/A', 
+            'Answer': r.answer, 
+            'Has Attachment': r.attachmentUrl ? 'Yes' : 'No', 
+            'Submitted At': new Date(r.submittedAt).toLocaleString()
         });
     });
     const ws = XLSX.utils.json_to_sheet(data);
@@ -954,7 +939,13 @@ function exportResponsesForEmployee(username) {
 
 function exportEmployeesToExcel() {
     const data = employees.map(emp => ({
-        'Full Name': emp.fullName, 'Username': emp.username, 'Email': emp.email, 'Phone': emp.phone, 'Department': emp.department || 'Not specified', 'Total Responses': responses.filter(r => r.employeeUsername === emp.username).length, 'Registered Date': new Date(emp.registeredAt).toLocaleDateString()
+        'Full Name': emp.fullName, 
+        'Username': emp.username, 
+        'Email': emp.email, 
+        'Phone': emp.phone, 
+        'Department': emp.department || 'Not specified', 
+        'Total Responses': responses.filter(r => r.employeeUsername === emp.username).length, 
+        'Registered Date': new Date(emp.registeredAt).toLocaleDateString()
     }));
     const ws = XLSX.utils.json_to_sheet(data);
     const wb = XLSX.utils.book_new();
