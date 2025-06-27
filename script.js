@@ -742,21 +742,26 @@ function updateBulkActionState() {
     }
 
     const totalCheckboxes = document.querySelectorAll('#questionsList .question-select-checkbox').length;
-    document.getElementById('selectAllCheckbox').checked = (totalCheckboxes > 0 && selectedCount === totalCheckboxes);
+    const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+    if (selectAllCheckbox) {
+        selectAllCheckbox.checked = (totalCheckboxes > 0 && selectedCount === totalCheckboxes);
+    }
     
     // Force hide modal if it's somehow visible
     forceHideModal();
 }
 
 function toggleSelectAll(checked) {
-    document.querySelectorAll('#questionsList .question-select-checkbox').forEach(checkbox => {
+    const checkboxes = document.querySelectorAll('#questionsList .question-select-checkbox');
+    checkboxes.forEach(checkbox => {
         checkbox.checked = checked;
     });
     updateBulkActionState();
 }
 
 async function deleteSelectedQuestions() {
-    const selectedIds = Array.from(document.querySelectorAll('#questionsList .question-select-checkbox:checked')).map(cb => cb.value);
+    const selectedCheckboxes = document.querySelectorAll('#questionsList .question-select-checkbox:checked');
+    const selectedIds = Array.from(selectedCheckboxes).map(cb => cb.value);
 
     if (selectedIds.length === 0) {
         alert('Please select at least one question to delete.');
@@ -768,10 +773,25 @@ async function deleteSelectedQuestions() {
     }
 
     try {
+        // Validate that all IDs are valid MongoDB ObjectIds
+        const validIds = selectedIds.filter(id => {
+            // Basic MongoDB ObjectId validation (24 character hex string)
+            return id && typeof id === 'string' && id.length === 24 && /^[0-9a-fA-F]{24}$/.test(id);
+        });
+
+        if (validIds.length === 0) {
+            alert('No valid question IDs selected.');
+            return;
+        }
+
+        if (validIds.length !== selectedIds.length) {
+            console.warn('Some invalid IDs were filtered out:', selectedIds.filter(id => !validIds.includes(id)));
+        }
+
         const res = await fetch(`${API_URL}/questions/bulk`, {
             method: 'DELETE',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ ids: selectedIds })
+            body: JSON.stringify({ ids: validIds })
         });
         
         if (!res.ok) {
@@ -779,10 +799,17 @@ async function deleteSelectedQuestions() {
             throw new Error(errorData.message || 'Failed to delete selected questions.');
         }
         
-        alert(`${selectedIds.length} question(s) deleted successfully.`);
+        alert(`${validIds.length} question(s) deleted successfully.`);
+        
+        // Clear all checkboxes
+        selectedCheckboxes.forEach(checkbox => {
+            checkbox.checked = false;
+        });
+        
         await fetchAllData();
         renderAdminDashboard();
     } catch (error) {
+        console.error('Bulk delete error:', error);
         alert(`Error: ${error.message}`);
     }
 }
