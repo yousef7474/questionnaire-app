@@ -18,11 +18,11 @@ async function sendWelcomeEmail(employeeEmail, employeeName) {
     const msg = {
         to: employeeEmail,
         from: fromEmail,
-        subject: 'مرحباً بك في نظام استبيان الموظفين',
+        subject: 'مرحباً بك في منصة حوكِم',
         html: `
             <div dir="rtl" style="font-family: Arial, sans-serif; text-align: right;">
                 <h1>أهلاً بك، ${employeeName}!</h1>
-                <p>تم تسجيلك بنجاح في نظام استبيان الموظفين.</p>
+                <p>تم تسجيلك بنجاح في منصة حوكِم.</p>
                 <p>يمكنك الآن تسجيل الدخول والبدء في الإجابة على الأسئلة المخصصة لك.</p>
                 <p>شكراً لك.</p>
             </div>
@@ -57,7 +57,7 @@ async function sendNewQuestionEmail(employeeEmail, questionTitle, expiryDate) {
         html: `
             <div dir="rtl" style="font-family: Arial, sans-serif; text-align: right;">
                 <h1>لديك سؤال جديد!</h1>
-                <p>تم تعيين سؤال جديد لك في نظام الاستبيان:</p>
+                <p>تم تعيين سؤال جديد لك في منصة حوكِم:</p>
                 <h2>${questionTitle}</h2>
                 <p>يرجى تسجيل الدخول إلى النظام للإجابة عليه.</p>
                 ${expiryText}

@@ -235,6 +235,7 @@ button:hover {
 .response-header {
     display: flex;
     justify-content: space-between;
+    align-items: center;
     margin-bottom: 15px;
     padding-bottom: 15px;
     border-bottom: 1px solid var(--border-color);
@@ -395,6 +396,35 @@ button:hover {
     background: #718096;
 }
 
+.employee-response-group {
+    background: var(--bg-primary);
+    border-radius: 10px;
+    padding: 25px;
+    margin-bottom: 25px;
+    box-shadow: var(--card-shadow);
+}
+
+.employee-response-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.employee-response-header h3 {
+    margin: 0;
+}
+
+.employee-response-group .response-card {
+    margin-bottom: 15px;
+}
+.employee-response-group .response-card:last-child {
+    margin-bottom: 0;
+}
+
+
 /* --- RTL STYLES FOR ARABIC --- */
 
 body.rtl {
@@ -436,6 +466,10 @@ body.rtl .checkbox-label input[type="checkbox"] {
 body.rtl .reminder-badge {
     margin-left: 0;
     margin-right: 10px;
+}
+
+body.rtl .employee-response-header {
+    flex-direction: row-reverse;
 }
 
 /* =================================================================
