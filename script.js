@@ -455,7 +455,7 @@ function loadEmployeeQuestions(filter = 'all') {
                     </div>
                     <div class="attachment-section">
                         <label data-translate="attachment_label_optional">Attachment (Optional):</label>
-                        <input type="file" id="attachment_${q._id}" accept="image/*,.pdf,.doc,.docx">
+                        <input type="file" id="attachment_${q._id}" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx">
                         <input type="url" id="url_${q._id}" data-translate-placeholder="paste_url_placeholder" placeholder="Or paste a URL">
                     </div>
                     <button type="submit" class="secondary-btn" data-translate="submit_response_btn">Submit Response</button>
@@ -501,7 +501,6 @@ document.getElementById('questionForm').addEventListener('submit', async functio
     }
 });
 
-// THIS FUNCTION IS NOW FIXED
 async function submitResponse(event, questionId) {
     event.preventDefault();
 
@@ -526,27 +525,19 @@ async function submitResponse(event, questionId) {
             const formData = new FormData();
             formData.append('file', file);
 
-            // THIS IS THE FIX: Use a CORS proxy
-            const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
-            const targetUrl = 'https://file.io';
-
-            const fileioRes = await fetch(proxyUrl + targetUrl, {
+            // Upload to our own backend, which will then send to File.io
+            const uploadRes = await fetch(`${API_URL}/upload`, {
                 method: 'POST',
                 body: formData,
             });
 
-            if (!fileioRes.ok) {
-                const errorText = await fileioRes.text();
-                console.error('File.io upload error:', errorText);
-                throw new Error(`File upload failed: ${fileioRes.status}`);
+            if (!uploadRes.ok) {
+                const errorData = await uploadRes.json();
+                throw new Error(errorData.message || `File upload failed: ${uploadRes.status}`);
             }
 
-            const fileioData = await fileioRes.json();
-            if (!fileioData.success) {
-                 throw new Error(`File.io reported an error: ${fileioData.message}`);
-            }
-            
-            attachmentUrl = fileioData.link;
+            const uploadData = await uploadRes.json();
+            attachmentUrl = uploadData.link;
         }
 
         submitButton.textContent = 'Saving response...';
@@ -572,8 +563,8 @@ async function submitResponse(event, questionId) {
         filterEmployeeQuestions();
 
     } catch (error) {
-        console.error('Upload error:', error);
-        alert(`Error: ${error.message}. You may need to enable the CORS Anywhere demo proxy.`);
+        console.error('File submission process error:', error);
+        alert(`Error: ${error.message}`);
         submitButton.disabled = false;
         submitButton.textContent = originalButtonText;
     }

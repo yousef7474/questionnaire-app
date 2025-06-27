@@ -6,21 +6,22 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 const cron = require('node-cron');
 const emailService = require('./emailService');
+const multer = require('multer');
+const FormData = require('form-data');
+const fetch = require('node-fetch');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-
-// Use the MONGO_URI from the environment variables
 const MONGO_URI = process.env.MONGO_URI;
 
 // --- Middleware ---
-const corsOptions = {
-  origin: 'https://questionnaire-app-xd7f.onrender.com',
-  optionsSuccessStatus: 200
-};
-app.use(cors(corsOptions));
+app.use(cors()); // Using a simpler CORS setup for now
 app.use(express.json());
 app.use(express.static(__dirname));
+
+// Multer setup for handling file uploads in memory
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 
 // =================================================================
 // --- DATABASE CONNECTION ---
@@ -32,7 +33,6 @@ mongoose.connect(MONGO_URI)
 // =================================================================
 // --- DATABASE SCHEMAS & MODELS ---
 // =================================================================
-
 const EmployeeSchema = new mongoose.Schema({
     username: { type: String, required: true, unique: true },
     password: { type: String, required: true },
@@ -72,7 +72,38 @@ const Response = mongoose.model('Response', ResponseSchema);
 // --- API ROUTES ---
 // =================================================================
 
-// REMOVED Cloudinary config endpoint as it's no longer needed
+// NEW FILE UPLOAD ENDPOINT
+app.post('/api/upload', upload.single('file'), async (req, res) => {
+    if (!req.file) {
+        return res.status(400).json({ message: 'No file uploaded.' });
+    }
+
+    try {
+        const form = new FormData();
+        form.append('file', req.file.buffer, { filename: req.file.originalname });
+
+        const fileioResponse = await fetch('https://file.io', {
+            method: 'POST',
+            body: form
+        });
+
+        if (!fileioResponse.ok) {
+            throw new Error(`File.io server responded with ${fileioResponse.status}`);
+        }
+
+        const fileioData = await fileioResponse.json();
+
+        if (!fileioData.success) {
+            throw new Error(fileioData.message || 'File.io upload failed');
+        }
+
+        res.json({ success: true, link: fileioData.link });
+    } catch (error) {
+        console.error('Error during file upload to File.io:', error);
+        res.status(500).json({ message: `Upload failed: ${error.message}` });
+    }
+});
+
 
 // --- Employees API ---
 app.get('/api/employees', async (req, res) => {
