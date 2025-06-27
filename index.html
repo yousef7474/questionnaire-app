@@ -155,7 +155,6 @@
                 <h3 data-translate="manage_questions_title">Manage Questions</h3>
                 <button class="info-btn" onclick="exportQuestionsToExcel()" data-translate="export_excel_btn">Export to Excel</button>
             </div>
-            <!-- NEW: Filter Section -->
             <div class="filter-section">
                 <label for="questionFilterStandard">تصفية حسب المعيار:</label>
                 <select id="questionFilterStandard" onchange="filterQuestions()">
@@ -173,6 +172,16 @@
             <div class="export-section">
                 <h3 data-translate="employee_responses_title">Employee Responses</h3>
                 <button class="info-btn" onclick="exportAllResponsesToExcel()" data-translate="export_all_responses_btn">Export All Responses to Excel</button>
+            </div>
+            <!-- NEW: Filter Section for Responses -->
+            <div class="filter-section">
+                <label for="responseFilterStandard">تصفية حسب المعيار:</label>
+                <select id="responseFilterStandard" onchange="filterResponses()">
+                    <option value="all">جميع المعايير</option>
+                    <option value="الإمتثال والإلتزام">الإمتثال والإلتزام</option>
+                    <option value="الشفافية والإفصاح">الشفافية والإفصاح</option>
+                    <option value="السلامة المالية">السلامة المالية</option>
+                </select>
             </div>
             <div id="responsesByEmployeeList"></div>
         </div>
