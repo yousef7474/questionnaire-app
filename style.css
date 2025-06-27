@@ -447,6 +447,9 @@ body.dark-theme .main-tab.active {
     box-shadow: 0 5px 25px rgba(0,0,0,0.3);
     width: 90%;
     max-width: 500px;
+    /* --- THE FIX IS HERE --- */
+    direction: ltr;
+    text-align: left;
 }
 .modal-content h3 {
     margin-top: 0;
