@@ -62,164 +62,182 @@
             </div>
         </div>
 
-        <!-- UPDATED STATS GRID -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-number" id="statGovernance">0</div>
-                <div class="stat-label" data-translate="stat_governance">Governance</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number" id="statManagement">0</div>
-                <div class="stat-label" data-translate="stat_management">Management</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number" id="statAwards">0</div>
-                <div class="stat-label" data-translate="stat_awards">Awards</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number" id="statExtra">---</div>
-                <div class="stat-label" data-translate="stat_extra">Coming Soon</div>
-            </div>
+        <!-- NEW: Main Tab Navigation -->
+        <div class="main-tab-container">
+            <div class="main-tab active" onclick="showMainTab('governance')">حوكمة</div>
+            <div class="main-tab" onclick="showMainTab('management')">إدارة</div>
+            <div class="main-tab" onclick="showMainTab('awards')">جوائز</div>
+            <div class="main-tab" onclick="showMainTab('extra')">Extra</div>
         </div>
 
-        <div class="tab-container">
-            <div class="tab active" onclick="showAdminTab('create')" data-translate="tab_create_questions">Create Questions</div>
-            <div class="tab" onclick="showAdminTab('manage')" data-translate="tab_manage_questions">Manage Questions</div>
-            <div class="tab" onclick="showAdminTab('responses')" data-translate="tab_view_responses">View Responses</div>
-            <div class="tab" onclick="showAdminTab('employees')" data-translate="tab_manage_employees">Manage Employees</div>
-            <div class="tab" onclick="showAdminTab('reminders')" data-translate="tab_reminders">Reminders</div>
-        </div>
+        <!-- NEW: Main Tab Content Wrapper -->
+        <div class="main-tab-content-wrapper">
 
-        <!-- Create Questions Tab -->
-        <div id="createTab" class="tab-content">
-            <div class="question-card">
-                <h3 data-translate="create_new_question_title">Create New Question</h3>
-                <form id="questionForm">
-                    <label data-translate="label_question_title">Question Title:</label>
-                    <input type="text" id="questionTitle" data-translate-placeholder="question_title_placeholder" placeholder="Enter your question" required>
-                    
-                    <div class="question-details-form-grid">
-                        <div>
-                            <label>المعيار (Standard):</label>
-                            <!-- UPDATED DROPDOWN -->
-                            <select id="standard" required>
-                                <option value="" disabled selected>اختر المعيار</option>
-                                <option value="حوكمة">حوكمة</option>
-                                <option value="إدارة">إدارة</option>
-                                <option value="جوائز">جوائز</option>
+            <!-- 1. Governance Tab Content (The entire old application) -->
+            <div id="governanceMainTab" class="main-tab-content">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalQuestions">0</div>
+                        <div class="stat-label" data-translate="stat_total_questions">Total Questions</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalResponses">0</div>
+                        <div class="stat-label" data-translate="stat_total_responses">Total Responses</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalEmployees">0</div>
+                        <div class="stat-label" data-translate="stat_total_employees">Registered Employees</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="pendingResponses">0</div>
+                        <div class="stat-label" data-translate="stat_pending_responses">Pending Responses</div>
+                    </div>
+                </div>
+
+                <div class="sub-tab-container">
+                    <div class="sub-tab active" onclick="showSubTab('create')" data-translate="tab_create_questions">Create Questions</div>
+                    <div class="sub-tab" onclick="showSubTab('manage')" data-translate="tab_manage_questions">Manage Questions</div>
+                    <div class="sub-tab" onclick="showSubTab('responses')" data-translate="tab_view_responses">View Responses</div>
+                    <div class="sub-tab" onclick="showSubTab('employees')" data-translate="tab_manage_employees">Manage Employees</div>
+                    <div class="sub-tab" onclick="showSubTab('reminders')" data-translate="tab_reminders">Reminders</div>
+                </div>
+
+                <!-- Create Questions Sub-Tab -->
+                <div id="createSubTab" class="sub-tab-content">
+                    <div class="question-card">
+                        <h3 data-translate="create_new_question_title">Create New Question</h3>
+                        <form id="questionForm">
+                            <label data-translate="label_question_title">Question Title:</label>
+                            <input type="text" id="questionTitle" data-translate-placeholder="question_title_placeholder" placeholder="Enter your question" required>
+                            
+                            <div class="question-details-form-grid">
+                                <div>
+                                    <label>المعيار (Standard):</label>
+                                    <select id="standard" required>
+                                        <option value="" disabled selected>اختر المعيار</option>
+                                        <option value="حوكمة">حوكمة</option>
+                                        <option value="إدارة">إدارة</option>
+                                        <option value="جوائز">جوائز</option>
+                                    </select>
+                                </div>
+                                <div><label>رقم المؤشر (Indicator No.):</label><input type="text" id="indicatorNumber" placeholder="e.g., 2.1.1"></div>
+                                <div><label>رقم الممارسة (Practice No.):</label><input type="text" id="practiceNumber" placeholder="e.g., 2.1.1.1"></div>
+                                <div><label>رقم السؤال (Question No.):</label><input type="text" id="questionNumber" placeholder="e.g., 1"></div>
+                            </div>
+                            
+                            <label data-translate="label_release_time" style="margin-top: 15px; display: block;">Release Date & Time:</label>
+                            <input type="datetime-local" id="releaseTime" required>
+                            
+                            <label data-translate="label_expiry_time">Expiry Date & Time (Optional):</label>
+                            <input type="datetime-local" id="expiryTime">
+                            
+                            <label data-translate="label_target_employees">Target Employees:</label>
+                            <select id="targetEmployees" multiple style="height: 100px;">
+                                <option value="all" data-translate="option_all_employees">All Employees</option>
+                            </select>
+                            
+                            <div class="notification-settings">
+                                <h4 data-translate="notification_settings_title">Notification Settings</h4>
+                                <label class="checkbox-label"><input type="checkbox" id="sendEmailNotification" checked><span data-translate="checkbox_email_notification">Send email notification</span></label>
+                                <label class="checkbox-label"><input type="checkbox" id="sendReminder" checked><span data-translate="checkbox_expiry_reminder">Send reminder 24 hours before</span></label>
+                            </div>
+                            
+                            <button type="submit" class="secondary-btn" data-translate="create_question_btn">Create Question</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Manage Questions Sub-Tab -->
+                <div id="manageSubTab" class="sub-tab-content hidden">
+                    <div class="export-section">
+                        <h3 data-translate="manage_questions_title">Manage Questions</h3>
+                        <button class="info-btn" onclick="exportQuestionsToExcel()" data-translate="export_excel_btn">Export to Excel</button>
+                    </div>
+                    <div class="filter-section">
+                        <label for="questionFilterStandard">تصفية حسب المعيار:</label>
+                        <select id="questionFilterStandard" onchange="filterQuestions()">
+                            <option value="all">جميع المعايير</option>
+                            <option value="حوكمة">حوكمة</option>
+                            <option value="إدارة">إدارة</option>
+                            <option value="جوائز">جوائز</option>
+                        </select>
+                    </div>
+                    <div id="questionsList"></div>
+                </div>
+
+                <!-- View Responses Sub-Tab -->
+                <div id="responsesSubTab" class="sub-tab-content hidden">
+                    <div class="export-section">
+                        <h3 data-translate="employee_responses_title">Employee Responses</h3>
+                        <button class="info-btn" onclick="exportAllResponsesToExcel()" data-translate="export_all_responses_btn">Export All Responses to Excel</button>
+                    </div>
+                    <div class="filter-section">
+                        <label for="responseFilterStandard">تصفية حسب المعيار:</label>
+                        <select id="responseFilterStandard" onchange="filterResponses()">
+                           <option value="all">جميع المعايير</option>
+                           <option value="حوكمة">حوكمة</option>
+                           <option value="إدارة">إدارة</option>
+                           <option value="جوائز">جوائز</option>
+                        </select>
+                    </div>
+                    <div id="responsesByEmployeeList"></div>
+                </div>
+
+                <!-- Manage Employees Sub-Tab -->
+                <div id="employeesSubTab" class="sub-tab-content hidden">
+                    <div class="export-section">
+                        <h3 data-translate="registered_employees_title">Registered Employees</h3>
+                        <button class="info-btn" onclick="exportEmployeesToExcel()" data-translate="export_excel_btn">Export to Excel</button>
+                    </div>
+                    <div id="employeesList"></div>
+                </div>
+
+                <!-- Reminders Sub-Tab -->
+                <div id="remindersSubTab" class="sub-tab-content hidden">
+                    <div class="question-card">
+                        <h3 data-translate="reminder_settings_title">Reminder Settings</h3>
+                        <p data-translate="reminder_settings_desc">Configure automatic reminders for employees</p>
+                        <div class="notification-settings">
+                            <label class="checkbox-label"><input type="checkbox" id="globalReminders" checked><span data-translate="checkbox_enable_reminders">Enable automatic reminders</span></label>
+                            <label data-translate="label_reminder_schedule">Reminder Schedule:</label>
+                            <select id="reminderSchedule">
+                                <option value="24" data-translate="option_24_hours">24 hours before expiry</option>
+                                <option value="48" data-translate="option_48_hours">48 hours before expiry</option>
+                                <option value="72" data-translate="option_72_hours">72 hours before expiry</option>
                             </select>
                         </div>
-                        <div>
-                            <label>رقم المؤشر (Indicator No.):</label>
-                            <input type="text" id="indicatorNumber" placeholder="e.g., 2.1.1">
-                        </div>
-                        <div>
-                            <label>رقم الممارسة (Practice No.):</label>
-                            <input type="text" id="practiceNumber" placeholder="e.g., 2.1.1.1">
-                        </div>
-                        <div>
-                            <label>رقم السؤال (Question No.):</label>
-                            <input type="text" id="questionNumber" placeholder="e.g., 1">
-                        </div>
+                        <button class="secondary-btn" onclick="saveReminderSettings()" data-translate="save_settings_btn">Save Settings</button>
                     </div>
-                    
-                    <label data-translate="label_release_time" style="margin-top: 15px; display: block;">Release Date & Time:</label>
-                    <input type="datetime-local" id="releaseTime" required>
-                    
-                    <label data-translate="label_expiry_time">Expiry Date & Time (Optional):</label>
-                    <input type="datetime-local" id="expiryTime">
-                    
-                    <label data-translate="label_target_employees">Target Employees:</label>
-                    <select id="targetEmployees" multiple style="height: 100px;">
-                        <option value="all" data-translate="option_all_employees">All Employees</option>
-                    </select>
-                    
-                    <div class="notification-settings">
-                        <h4 data-translate="notification_settings_title">Notification Settings</h4>
-                        <label class="checkbox-label">
-                            <input type="checkbox" id="sendEmailNotification" checked>
-                            <span data-translate="checkbox_email_notification">Send email notification when question is released</span>
-                        </label>
-                        <label class="checkbox-label">
-                            <input type="checkbox" id="sendReminder" checked>
-                            <span data-translate="checkbox_expiry_reminder">Send reminder 24 hours before expiry</span>
-                        </label>
-                    </div>
-                    
-                    <button type="submit" class="secondary-btn" data-translate="create_question_btn">Create Question</button>
-                </form>
-            </div>
-        </div>
-
-        <!-- Manage Questions Tab -->
-        <div id="manageTab" class="tab-content hidden">
-            <div class="export-section">
-                <h3 data-translate="manage_questions_title">Manage Questions</h3>
-                <button class="info-btn" onclick="exportQuestionsToExcel()" data-translate="export_excel_btn">Export to Excel</button>
-            </div>
-            <div class="filter-section">
-                <label for="questionFilterStandard">تصفية حسب المعيار:</label>
-                <!-- UPDATED FILTER -->
-                <select id="questionFilterStandard" onchange="filterQuestions()">
-                    <option value="all">جميع المعايير</option>
-                    <option value="حوكمة">حوكمة</option>
-                    <option value="إدارة">إدارة</option>
-                    <option value="جوائز">جوائز</option>
-                </select>
-            </div>
-            <div id="questionsList"></div>
-        </div>
-
-        <!-- View Responses Tab -->
-        <div id="responsesTab" class="tab-content hidden">
-            <div class="export-section">
-                <h3 data-translate="employee_responses_title">Employee Responses</h3>
-                <button class="info-btn" onclick="exportAllResponsesToExcel()" data-translate="export_all_responses_btn">Export All Responses to Excel</button>
-            </div>
-            <div class="filter-section">
-                <label for="responseFilterStandard">تصفية حسب المعيار:</label>
-                <!-- UPDATED FILTER -->
-                <select id="responseFilterStandard" onchange="filterResponses()">
-                    <option value="all">جميع المعايير</option>
-                    <option value="حوكمة">حوكمة</option>
-                    <option value="إدارة">إدارة</option>
-                    <option value="جوائز">جوائز</option>
-                </select>
-            </div>
-            <div id="responsesByEmployeeList"></div>
-        </div>
-
-        <!-- Manage Employees Tab -->
-        <div id="employeesTab" class="tab-content hidden">
-            <div class="export-section">
-                <h3 data-translate="registered_employees_title">Registered Employees</h3>
-                <button class="info-btn" onclick="exportEmployeesToExcel()" data-translate="export_excel_btn">Export to Excel</button>
-            </div>
-            <div id="employeesList"></div>
-        </div>
-
-        <!-- Reminders Tab -->
-        <div id="remindersTab" class="tab-content hidden">
-            <div class="question-card">
-                <h3 data-translate="reminder_settings_title">Reminder Settings</h3>
-                <p data-translate="reminder_settings_desc">Configure automatic reminders for employees</p>
-                <div class="notification-settings">
-                    <label class="checkbox-label">
-                        <input type="checkbox" id="globalReminders" checked>
-                        <span data-translate="checkbox_enable_reminders">Enable automatic reminders for all questions</span>
-                    </label>
-                    <label data-translate="label_reminder_schedule">Reminder Schedule:</label>
-                    <select id="reminderSchedule">
-                        <option value="24" data-translate="option_24_hours">24 hours before expiry</option>
-                        <option value="48" data-translate="option_48_hours">48 hours before expiry</option>
-                        <option value="72" data-translate="option_72_hours">72 hours before expiry</option>
-                    </select>
+                    <div id="remindersList"></div>
                 </div>
-                <button class="secondary-btn" onclick="saveReminderSettings()" data-translate="save_settings_btn">Save Settings</button>
             </div>
-            <div id="remindersList"></div>
+
+            <!-- 2. Management Tab Content (Placeholder) -->
+            <div id="managementMainTab" class="main-tab-content hidden">
+                <div class="placeholder-card">
+                    <h2>إدارة</h2>
+                    <p>محتوى قسم الإدارة سيوضع هنا قريباً.</p>
+                </div>
+            </div>
+
+            <!-- 3. Awards Tab Content (Placeholder) -->
+            <div id="awardsMainTab" class="main-tab-content hidden">
+                <div class="placeholder-card">
+                    <h2>جوائز</h2>
+                    <p>محتوى قسم الجوائز سيوضع هنا قريباً.</p>
+                </div>
+            </div>
+
+            <!-- 4. Extra Tab Content (Placeholder) -->
+            <div id="extraMainTab" class="main-tab-content hidden">
+                 <div class="placeholder-card">
+                    <h2>Extra</h2>
+                    <p>This section is a placeholder for future content.</p>
+                </div>
+            </div>
         </div>
     </div>
+    
     <!-- Employee Dashboard -->
     <div id="employeeDashboard" class="container hidden">
         <div class="app-header">
