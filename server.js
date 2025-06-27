@@ -92,7 +92,7 @@ app.post('/api/upload', upload.single('file'), async (req, res) => {
         form.append('name', req.file.originalname); // Keep original filename
         form.append('title', `Questionnaire Upload - ${req.file.originalname}`);
 
-        const imgurResponse = await fetch('https://api.imgur.com/3/upload', { // Use /3/upload endpoint
+        const imgurResponse = await fetch('https://api.imgur.com/3/upload', {
             method: 'POST',
             headers: {
                 'Authorization': `Client-ID ${IMGUR_CLIENT_ID}`,
@@ -102,9 +102,12 @@ app.post('/api/upload', upload.single('file'), async (req, res) => {
         });
 
         const imgurData = await imgurResponse.json();
-
+        
+        // Corrected error handling
         if (!imgurResponse.ok || !imgurData.success) {
-            const errorMessage = imgurData.data.error.message || `Imgur server responded with ${imgurResponse.status}`;
+            const errorMessage = (imgurData.data && imgurData.data.error) 
+                ? (typeof imgurData.data.error === 'string' ? imgurData.data.error : JSON.stringify(imgurData.data.error))
+                : `Imgur server responded with ${imgurResponse.status}`;
             throw new Error(errorMessage);
         }
 
