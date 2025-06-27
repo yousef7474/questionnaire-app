@@ -724,37 +724,48 @@ function reassignQuestion(questionId) {
 // =================================================================
 
 function updateBulkActionState() {
-    const checkboxes = document.querySelectorAll('#questionsList .question-select-checkbox:checked');
-    const selectedCount = checkboxes.length;
-    const bulkActionsBar = document.getElementById('bulkActionsBar');
-    
-    if (selectedCount > 0) {
-        bulkActionsBar.classList.remove('hidden');
-        document.getElementById('selectionCount').textContent = `${selectedCount} selected`;
+    try {
+        const checkboxes = document.querySelectorAll('#questionsList .question-select-checkbox:checked');
+        const selectedCount = checkboxes.length;
+        const bulkActionsBar = document.getElementById('bulkActionsBar');
         
-        // Hide the reassign button in the bulk actions bar
-        const reassignBtn = bulkActionsBar.querySelector('button[onclick*="reassignSelectedModal"]');
-        if (reassignBtn) {
-            reassignBtn.style.display = 'none';
+        if (!bulkActionsBar) return; // Exit if element doesn't exist
+        
+        if (selectedCount > 0) {
+            bulkActionsBar.classList.remove('hidden');
+            const selectionCountEl = document.getElementById('selectionCount');
+            if (selectionCountEl) {
+                selectionCountEl.textContent = `${selectedCount} selected`;
+            }
+            
+            // Hide the reassign button
+            const reassignBtn = bulkActionsBar.querySelector('button[onclick*="reassignSelectedModal"]');
+            if (reassignBtn) {
+                reassignBtn.style.display = 'none';
+            }
+        } else {
+            bulkActionsBar.classList.add('hidden');
         }
-    } else {
-        bulkActionsBar.classList.add('hidden');
-    }
 
-    const totalCheckboxes = document.querySelectorAll('#questionsList .question-select-checkbox').length;
-    const selectAllCheckbox = document.getElementById('selectAllCheckbox');
-    if (selectAllCheckbox) {
-        selectAllCheckbox.checked = (totalCheckboxes > 0 && selectedCount === totalCheckboxes);
+        const totalCheckboxes = document.querySelectorAll('#questionsList .question-select-checkbox').length;
+        const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+        if (selectAllCheckbox) {
+            selectAllCheckbox.checked = (totalCheckboxes > 0 && selectedCount === totalCheckboxes);
+        }
+        
+        // Force hide modal
+        forceHideModal();
+    } catch (error) {
+        console.error('Error in updateBulkActionState:', error);
     }
-    
-    // Force hide modal if it's somehow visible
-    forceHideModal();
 }
 
 function toggleSelectAll(checked) {
     const checkboxes = document.querySelectorAll('#questionsList .question-select-checkbox');
     checkboxes.forEach(checkbox => {
-        checkbox.checked = checked;
+        if (checkbox.checked !== checked) {
+            checkbox.checked = checked;
+        }
     });
     updateBulkActionState();
 }
@@ -772,45 +783,132 @@ async function deleteSelectedQuestions() {
         return;
     }
 
+    let successCount = 0;
+    let errorCount = 0;
+    const errors = [];
+
+    // Find the delete button and disable it
+    const deleteButton = document.querySelector('button[onclick*="deleteSelectedQuestions"]');
+    const originalText = deleteButton ? deleteButton.textContent : 'Delete Selected';
+    
     try {
-        // Validate that all IDs are valid MongoDB ObjectIds
-        const validIds = selectedIds.filter(id => {
-            // Basic MongoDB ObjectId validation (24 character hex string)
-            return id && typeof id === 'string' && id.length === 24 && /^[0-9a-fA-F]{24}$/.test(id);
-        });
-
-        if (validIds.length === 0) {
-            alert('No valid question IDs selected.');
-            return;
+        if (deleteButton) {
+            deleteButton.disabled = true;
         }
 
-        if (validIds.length !== selectedIds.length) {
-            console.warn('Some invalid IDs were filtered out:', selectedIds.filter(id => !validIds.includes(id)));
+        // For single question, delete immediately
+        if (selectedIds.length === 1) {
+            if (deleteButton) deleteButton.textContent = 'Deleting...';
+            
+            try {
+                const res = await fetch(`${API_URL}/questions/${selectedIds[0]}`, { 
+                    method: 'DELETE' 
+                });
+                
+                if (res.status === 204 || res.status === 200) {
+                    successCount = 1;
+                    alert('Question deleted successfully.');
+                } else {
+                    errorCount = 1;
+                    alert('Failed to delete question.');
+                }
+            } catch (error) {
+                errorCount = 1;
+                alert(`Error deleting question: ${error.message}`);
+            }
+        } 
+        // For multiple questions, use sequential deletion with delays
+        else {
+            if (deleteButton) deleteButton.textContent = 'Preparing to delete...';
+            
+            // Add a small delay before starting
+            await new Promise(resolve => setTimeout(resolve, 500));
+
+            for (let i = 0; i < selectedIds.length; i++) {
+                const id = selectedIds[i];
+                
+                try {
+                    // Update progress
+                    if (deleteButton) {
+                        deleteButton.textContent = `Deleting ${i + 1} of ${selectedIds.length}...`;
+                    }
+
+                    // Make the delete request
+                    const res = await fetch(`${API_URL}/questions/${id}`, { 
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    
+                    if (res.status === 204 || res.status === 200) {
+                        successCount++;
+                        console.log(`Successfully deleted question ${i + 1}/${selectedIds.length}`);
+                    } else {
+                        errorCount++;
+                        const errorText = await res.text().catch(() => 'Unknown error');
+                        errors.push(`Question ${i + 1}: HTTP ${res.status} - ${errorText}`);
+                        console.error(`Failed to delete question ${i + 1}:`, res.status, errorText);
+                    }
+                } catch (error) {
+                    errorCount++;
+                    errors.push(`Question ${i + 1}: ${error.message}`);
+                    console.error(`Error deleting question ${i + 1}:`, error);
+                }
+
+                // Add delay between deletions to prevent server overload
+                if (i < selectedIds.length - 1) {
+                    await new Promise(resolve => setTimeout(resolve, 300));
+                }
+            }
+
+            // Show detailed results for multiple deletions
+            let message = '';
+            if (successCount > 0) {
+                message = `Successfully deleted ${successCount} out of ${selectedIds.length} question(s).`;
+            }
+            if (errorCount > 0) {
+                message += `\n${errorCount} failed to delete.`;
+                if (errors.length > 0 && errors.length <= 3) {
+                    message += '\n\nErrors:\n' + errors.join('\n');
+                } else if (errors.length > 3) {
+                    message += '\n\nCheck console for detailed error messages.';
+                    console.error('All delete errors:', errors);
+                }
+            }
+            
+            alert(message);
         }
 
-        const res = await fetch(`${API_URL}/questions/bulk`, {
-            method: 'DELETE',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ ids: validIds })
-        });
-        
-        if (!res.ok) {
-            const errorData = await res.json();
-            throw new Error(errorData.message || 'Failed to delete selected questions.');
+    } catch (error) {
+        console.error('Bulk delete error:', error);
+        alert(`Unexpected error during deletion: ${error.message}`);
+    } finally {
+        // Always reset the button and clear selections
+        if (deleteButton) {
+            deleteButton.textContent = originalText;
+            deleteButton.disabled = false;
         }
-        
-        alert(`${validIds.length} question(s) deleted successfully.`);
-        
+
         // Clear all checkboxes
         selectedCheckboxes.forEach(checkbox => {
             checkbox.checked = false;
         });
-        
-        await fetchAllData();
-        renderAdminDashboard();
-    } catch (error) {
-        console.error('Bulk delete error:', error);
-        alert(`Error: ${error.message}`);
+
+        // Update bulk action state
+        updateBulkActionState();
+
+        // Refresh data only if at least one deletion was successful
+        if (successCount > 0) {
+            if (deleteButton) deleteButton.textContent = 'Refreshing...';
+            try {
+                await fetchAllData();
+                renderAdminDashboard();
+            } catch (refreshError) {
+                console.error('Error refreshing data:', refreshError);
+            }
+            if (deleteButton) deleteButton.textContent = originalText;
+        }
     }
 }
 // =================================================================
