@@ -2,7 +2,7 @@
 require('dotenv').config();
 
 const express = require('express');
-const cors =require('cors');
+const cors = require('cors');
 const mongoose = require('mongoose');
 const cron = require('node-cron');
 const emailService = require('./emailService');
@@ -62,27 +62,22 @@ app.post('/api/upload', upload.single('file'), async (req, res) => {
         return res.status(500).json({ message: "File storage is not configured." });
     }
 
-    // Create a unique filename to prevent overwriting
-    const key = `${Date.now()}_${req.file.originalname.replace(/\s/g, '_')}`;
+    // Sanitize the filename to be URL-safe
+    const sanitizedFilename = req.file.originalname.replace(/[^a-zA-Z0-9-_\.]/g, '_');
+    const key = `${Date.now()}_${sanitizedFilename}`;
 
     const params = {
         Bucket: bucketName,
         Key: key,
         Body: req.file.buffer,
-        // ACL: 'public-read', // We will not make files public by default
         ContentType: req.file.mimetype
+        // We do not set ACL here; the bucket policy handles permissions.
     };
 
     try {
-        const uploadResult = await s3.upload(params).promise();
-        console.log(`File uploaded successfully to S3: ${uploadResult.Location}`);
-        
-        // Instead of a public URL, we'll use a presigned URL for secure, temporary access
-        const urlParams = { Bucket: bucketName, Key: key, Expires: 604800 }; // Expires in 7 days
-        const signedUrl = s3.getSignedUrl('getObject', urlParams);
-        
-        res.json({ success: true, link: signedUrl });
-        
+        const data = await s3.upload(params).promise();
+        console.log(`File uploaded successfully to S3: ${data.Location}`);
+        res.json({ success: true, link: data.Location }); // data.Location is the public URL
     } catch (error) {
         console.error('Error during S3 upload:', error);
         res.status(500).json({ message: `Upload failed: ${error.message}` });
@@ -91,151 +86,16 @@ app.post('/api/upload', upload.single('file'), async (req, res) => {
 
 
 // --- Employees API ---
-app.get('/api/employees', async (req, res) => {
-    try {
-        const employees = await Employee.find().select('-password');
-        res.json(employees);
-    } catch (err) { res.status(500).json({ message: err.message }); }
-});
-
-app.post('/api/employees/register', async (req, res) => {
-    try {
-        const existingEmployee = await Employee.findOne({ username: req.body.username });
-        if (existingEmployee) {
-            return res.status(409).json({ message: "Username already exists." });
-        }
-        const newEmployee = new Employee(req.body);
-        await newEmployee.save();
-        emailService.sendWelcomeEmail(newEmployee.email, newEmployee.fullName);
-        res.status(201).json(newEmployee);
-    } catch (err) { res.status(400).json({ message: err.message }); }
-});
-
-app.post('/api/employees/login', async (req, res) => {
-    try {
-        const { username, password, role } = req.body;
-
-        if (role === 'admin') {
-            const adminUser = process.env.ADMIN_USERNAME;
-            const adminPass = process.env.ADMIN_PASSWORD;
-
-            if (!adminUser || !adminPass) {
-                console.error("CRITICAL: Admin credentials are not set in environment variables.");
-                return res.status(500).json({ message: "Server configuration error." });
-            }
-
-            if (username === adminUser && password === adminPass) {
-                console.log(`Admin user "${username}" logged in successfully.`);
-                res.json({ username: username, role: 'admin' });
-            } else {
-                console.warn(`Failed admin login attempt for user "${username}".`);
-                return res.status(401).json({ message: "Invalid admin username or password." });
-            }
-        } else if (role === 'employee') {
-            const employee = await Employee.findOne({ username: username });
-            if (!employee || employee.password !== password) {
-                return res.status(401).json({ message: "Invalid employee username or password." });
-            }
-            const employeeData = employee.toObject();
-            delete employeeData.password;
-            res.json({ ...employeeData, role: 'employee' });
-        } else {
-            res.status(400).json({ message: "Invalid role specified." });
-        }
-    } catch (err) { 
-        console.error("Login endpoint error:", err);
-        res.status(500).json({ message: err.message }); 
-    }
-});
-
-
-app.put('/api/employees/:id', async (req, res) => {
-    try {
-        const { id } = req.params;
-        const updates = req.body;
-        const updatedEmployee = await Employee.findByIdAndUpdate(id, updates, { new: true });
-        if (!updatedEmployee) {
-            return res.status(404).json({ message: 'Employee not found' });
-        }
-        console.log(`Updated employee: ${updatedEmployee.username}`);
-        res.json(updatedEmployee);
-    } catch (err) {
-        console.error('Error updating employee:', err);
-        res.status(500).json({ message: err.message });
-    }
-});
-
-app.delete('/api/employees/:id', async (req, res) => {
-    try {
-        const { id } = req.params;
-        const employeeToDelete = await Employee.findById(id);
-        if (!employeeToDelete) {
-            return res.status(404).json({ message: 'Employee not found' });
-        }
-        await Response.deleteMany({ employeeUsername: employeeToDelete.username });
-        await Employee.findByIdAndDelete(id);
-        console.log(`Deleted employee ${employeeToDelete.username} and their responses.`);
-        res.status(204).send();
-    } catch (err) {
-        console.error('Error deleting employee:', err);
-        res.status(500).json({ message: err.message });
-    }
-});
-
-
-// --- Questions API ---
-app.get('/api/questions', async (req, res) => {
-    try {
-        const questions = await Question.find();
-        res.json(questions);
-    } catch (err) { res.status(500).json({ message: err.message }); }
-});
-
-app.post('/api/questions', async (req, res) => {
-    try {
-        const newQuestion = new Question(req.body);
-        await newQuestion.save();
-        if (newQuestion.targetEmployees.includes('all')) {
-            const allEmployees = await Employee.find({}, 'email');
-            console.log(`Sending new question notification to all ${allEmployees.length} employees.`);
-            allEmployees.forEach(emp => {
-                emailService.sendNewQuestionEmail(emp.email, newQuestion.title, newQuestion.expiryTime);
-            });
-        } else {
-            const targetEmployees = await Employee.find({ username: { $in: newQuestion.targetEmployees } }, 'email');
-            console.log(`Sending new question notification to ${targetEmployees.length} targeted employees.`);
-            targetEmployees.forEach(emp => {
-                emailService.sendNewQuestionEmail(emp.email, newQuestion.title, newQuestion.expiryTime);
-            });
-        }
-        res.status(201).json(newQuestion);
-    } catch (err) { res.status(400).json({ message: err.message }); }
-});
-
-app.delete('/api/questions/:id', async (req, res) => {
-    try {
-        const { id } = req.params;
-        await Response.deleteMany({ questionId: id });
-        await Question.findByIdAndDelete(id);
-        res.status(204).send();
-    } catch (err) { res.status(500).json({ message: err.message }); }
-});
-
-// --- Responses API ---
-app.get('/api/responses', async (req, res) => {
-    try {
-        const responses = await Response.find();
-        res.json(responses);
-    } catch (err) { res.status(500).json({ message: err.message }); }
-});
-
-app.post('/api/responses', async (req, res) => {
-    try {
-        const newResponse = new Response(req.body);
-        await newResponse.save();
-        res.status(201).json(newResponse);
-    } catch (err) { res.status(400).json({ message: err.message }); }
-});
+app.get('/api/employees', async (req, res) => { try { const employees = await Employee.find().select('-password'); res.json(employees); } catch (err) { res.status(500).json({ message: err.message }); }});
+app.post('/api/employees/register', async (req, res) => { try { const existingEmployee = await Employee.findOne({ username: req.body.username }); if (existingEmployee) { return res.status(409).json({ message: "Username already exists." }); } const newEmployee = new Employee(req.body); await newEmployee.save(); emailService.sendWelcomeEmail(newEmployee.email, newEmployee.fullName); res.status(201).json(newEmployee); } catch (err) { res.status(400).json({ message: err.message }); }});
+app.post('/api/employees/login', async (req, res) => { try { const { username, password, role } = req.body; if (role === 'admin') { const adminUser = process.env.ADMIN_USERNAME; const adminPass = process.env.ADMIN_PASSWORD; if (!adminUser || !adminPass) { console.error("CRITICAL: Admin credentials are not set in environment variables."); return res.status(500).json({ message: "Server configuration error." }); } if (username === adminUser && password === adminPass) { console.log(`Admin user "${username}" logged in successfully.`); res.json({ username: username, role: 'admin' }); } else { console.warn(`Failed admin login attempt for user "${username}".`); return res.status(401).json({ message: "Invalid admin username or password." }); } } else if (role === 'employee') { const employee = await Employee.findOne({ username: username }); if (!employee || employee.password !== password) { return res.status(401).json({ message: "Invalid employee username or password." }); } const employeeData = employee.toObject(); delete employeeData.password; res.json({ ...employeeData, role: 'employee' }); } else { res.status(400).json({ message: "Invalid role specified." }); } } catch (err) { console.error("Login endpoint error:", err); res.status(500).json({ message: err.message }); }});
+app.put('/api/employees/:id', async (req, res) => { try { const { id } = req.params; const updates = req.body; const updatedEmployee = await Employee.findByIdAndUpdate(id, updates, { new: true }); if (!updatedEmployee) { return res.status(404).json({ message: 'Employee not found' }); } console.log(`Updated employee: ${updatedEmployee.username}`); res.json(updatedEmployee); } catch (err) { console.error('Error updating employee:', err); res.status(500).json({ message: err.message }); }});
+app.delete('/api/employees/:id', async (req, res) => { try { const { id } = req.params; const employeeToDelete = await Employee.findById(id); if (!employeeToDelete) { return res.status(404).json({ message: 'Employee not found' }); } await Response.deleteMany({ employeeUsername: employeeToDelete.username }); await Employee.findByIdAndDelete(id); console.log(`Deleted employee ${employeeToDelete.username} and their responses.`); res.status(204).send(); } catch (err) { console.error('Error deleting employee:', err); res.status(500).json({ message: err.message }); }});
+app.get('/api/questions', async (req, res) => { try { const questions = await Question.find(); res.json(questions); } catch (err) { res.status(500).json({ message: err.message }); }});
+app.post('/api/questions', async (req, res) => { try { const newQuestion = new Question(req.body); await newQuestion.save(); if (newQuestion.targetEmployees.includes('all')) { const allEmployees = await Employee.find({}, 'email'); allEmployees.forEach(emp => { emailService.sendNewQuestionEmail(emp.email, newQuestion.title, newQuestion.expiryTime); }); } else { const targetEmployees = await Employee.find({ username: { $in: newQuestion.targetEmployees } }, 'email'); targetEmployees.forEach(emp => { emailService.sendNewQuestionEmail(emp.email, newQuestion.title, newQuestion.expiryTime); }); } res.status(201).json(newQuestion); } catch (err) { res.status(400).json({ message: err.message }); }});
+app.delete('/api/questions/:id', async (req, res) => { try { const { id } = req.params; await Response.deleteMany({ questionId: id }); await Question.findByIdAndDelete(id); res.status(204).send(); } catch (err) { res.status(500).json({ message: err.message }); }});
+app.get('/api/responses', async (req, res) => { try { const responses = await Response.find(); res.json(responses); } catch (err) { res.status(500).json({ message: err.message }); }});
+app.post('/api/responses', async (req, res) => { try { const newResponse = new Response(req.body); await newResponse.save(); res.status(201).json(newResponse); } catch (err) { res.status(400).json({ message: err.message }); }});
 
 // =================================================================
 // --- SCHEDULED TASKS (CRON JOBS) ---
