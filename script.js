@@ -751,8 +751,15 @@ function reassignSelectedModal() {
 }
 
 function closeReassignModal() {
-    document.getElementById('reassignModal').classList.add('hidden');
+    const modal = document.getElementById('reassignModal');
+    modal.classList.add('hidden');
     document.getElementById('reassignForm').reset();
+    
+    // Clear any selected checkboxes to prevent the modal from reopening
+    document.querySelectorAll('#questionsList .question-select-checkbox:checked').forEach(checkbox => {
+        checkbox.checked = false;
+    });
+    updateBulkActionState();
 }
 
 async function handleReassignSubmit(e) {
