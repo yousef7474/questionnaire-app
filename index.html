@@ -298,7 +298,8 @@
     </div>
 
     <!-- NEW: Re-assign Modal -->
-    <div id="reassignModal" class="modal-overlay hidden">
+    <!-- THE FIX: Added onclick="handleOverlayClick(event)" to the overlay -->
+    <div id="reassignModal" class="modal-overlay hidden" onclick="handleOverlayClick(event)">
         <div class="modal-content">
             <h3>Re-assign Selected Questions</h3>
             <p>Set new details for the <span id="reassignCount"></span> selected questions. New questions will be created based on the originals.</p>

@@ -89,6 +89,18 @@ document.addEventListener('DOMContentLoaded', () => {
     // Event listener for the new re-assign modal form
     document.getElementById('reassignForm').addEventListener('submit', handleReassignSubmit);
 
+    // THE FIX: Add Escape key listener to close modal
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' || event.key === 'Esc') {
+            const modal = document.getElementById('reassignModal');
+            // Check if the modal is currently visible before trying to close it
+            if (!modal.classList.contains('hidden')) {
+                closeReassignModal();
+            }
+        }
+    });
+
+
     checkLoginStatus();
 });
 
@@ -799,6 +811,15 @@ async function handleReassignSubmit(e) {
 // =================================================================
 // --- Helper & Utility Functions ---
 // =================================================================
+
+// THE FIX: New function to handle closing the modal by clicking the background
+function handleOverlayClick(event) {
+    // Close the modal only if the user clicks on the overlay div itself,
+    // and not on the content box inside it.
+    if (event.target === event.currentTarget) {
+        closeReassignModal();
+    }
+}
 
 function filterQuestions() {
     const filterValue = document.getElementById('questionFilterStandard').value;
