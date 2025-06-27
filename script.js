@@ -64,7 +64,12 @@ function setLanguage(lang) {
     document.querySelectorAll('[data-translate]').forEach(el => {
         const key = el.getAttribute('data-translate');
         if (translations[lang] && translations[lang][key]) {
-            el.textContent = translations[lang][key];
+            // For radio buttons, we set the text content of the span inside the label
+            if (el.tagName === 'SPAN' && el.parentElement.tagName === 'LABEL') {
+                el.textContent = translations[lang][key];
+            } else {
+                 el.textContent = translations[lang][key];
+            }
         }
     });
     document.querySelectorAll('[data-translate-placeholder]').forEach(el => {
@@ -232,14 +237,12 @@ function renderAdminDashboard() {
     loadEmployeeOptions();
 }
 
+// THIS FUNCTION IS NOW FIXED
 function renderEmployeeDashboard() {
-    // Reset the filter to 'all' whenever the employee dashboard is rendered
-    const allRadio = document.querySelector('input[name="employeeQuestionFilter"][value="all"]');
-    if (allRadio) {
-        allRadio.checked = true;
-    }
-    loadEmployeeQuestions('all'); 
+    const filterValue = document.querySelector('input[name="employeeQuestionFilter"]:checked')?.value || 'all';
+    loadEmployeeQuestions(filterValue); 
 }
+
 
 function updateStats() {
     document.getElementById('totalQuestions').textContent = questions.length;
@@ -589,9 +592,11 @@ async function submitResponse(event, questionId) {
 
         if (!res.ok) throw new Error('Failed to submit response to our server.');
 
-        responses.push(await res.json());
+        // Instead of just pushing, re-fetch all data to get the latest state
+        await fetchAllData();
         alert('Response submitted successfully!');
-        renderEmployeeDashboard();
+        // Re-render the dashboard with the new data and the current filter
+        filterEmployeeQuestions();
 
     } catch (error) {
         console.error('Upload error:', error);
@@ -694,6 +699,7 @@ function filterResponses() {
     loadResponses(filterValue);
 }
 
+// THIS FUNCTION IS NOW FIXED
 function filterEmployeeQuestions() {
     const filterValue = document.querySelector('input[name="employeeQuestionFilter"]:checked').value;
     loadEmployeeQuestions(filterValue);
