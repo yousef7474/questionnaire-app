@@ -62,22 +62,23 @@
             </div>
         </div>
 
+        <!-- UPDATED STATS GRID -->
         <div class="stats-grid">
             <div class="stat-card">
-                <div class="stat-number" id="totalQuestions">0</div>
-                <div class="stat-label" data-translate="stat_total_questions">Total Questions</div>
+                <div class="stat-number" id="statGovernance">0</div>
+                <div class="stat-label" data-translate="stat_governance">Governance</div>
             </div>
             <div class="stat-card">
-                <div class="stat-number" id="totalResponses">0</div>
-                <div class="stat-label" data-translate="stat_total_responses">Total Responses</div>
+                <div class="stat-number" id="statManagement">0</div>
+                <div class="stat-label" data-translate="stat_management">Management</div>
             </div>
             <div class="stat-card">
-                <div class="stat-number" id="totalEmployees">0</div>
-                <div class="stat-label" data-translate="stat_total_employees">Registered Employees</div>
+                <div class="stat-number" id="statAwards">0</div>
+                <div class="stat-label" data-translate="stat_awards">Awards</div>
             </div>
             <div class="stat-card">
-                <div class="stat-number" id="pendingResponses">0</div>
-                <div class="stat-label" data-translate="stat_pending_responses">Pending Responses</div>
+                <div class="stat-number" id="statExtra">---</div>
+                <div class="stat-label" data-translate="stat_extra">Coming Soon</div>
             </div>
         </div>
 
@@ -100,11 +101,12 @@
                     <div class="question-details-form-grid">
                         <div>
                             <label>المعيار (Standard):</label>
+                            <!-- UPDATED DROPDOWN -->
                             <select id="standard" required>
                                 <option value="" disabled selected>اختر المعيار</option>
-                                <option value="الإمتثال والإلتزام">الإمتثال والإلتزام</option>
-                                <option value="الشفافية والإفصاح">الشفافية والإفصاح</option>
-                                <option value="السلامة المالية">السلامة المالية</option>
+                                <option value="حوكمة">حوكمة</option>
+                                <option value="إدارة">إدارة</option>
+                                <option value="جوائز">جوائز</option>
                             </select>
                         </div>
                         <div>
@@ -157,11 +159,12 @@
             </div>
             <div class="filter-section">
                 <label for="questionFilterStandard">تصفية حسب المعيار:</label>
+                <!-- UPDATED FILTER -->
                 <select id="questionFilterStandard" onchange="filterQuestions()">
                     <option value="all">جميع المعايير</option>
-                    <option value="الإمتثال والإلتزام">الإمتثال والإلتزام</option>
-                    <option value="الشفافية والإفصاح">الشفافية والإفصاح</option>
-                    <option value="السلامة المالية">السلامة المالية</option>
+                    <option value="حوكمة">حوكمة</option>
+                    <option value="إدارة">إدارة</option>
+                    <option value="جوائز">جوائز</option>
                 </select>
             </div>
             <div id="questionsList"></div>
@@ -175,11 +178,12 @@
             </div>
             <div class="filter-section">
                 <label for="responseFilterStandard">تصفية حسب المعيار:</label>
+                <!-- UPDATED FILTER -->
                 <select id="responseFilterStandard" onchange="filterResponses()">
                     <option value="all">جميع المعايير</option>
-                    <option value="الإمتثال والإلتزام">الإمتثال والإلتزام</option>
-                    <option value="الشفافية والإفصاح">الشفافية والإفصاح</option>
-                    <option value="السلامة المالية">السلامة المالية</option>
+                    <option value="حوكمة">حوكمة</option>
+                    <option value="إدارة">إدارة</option>
+                    <option value="جوائز">جوائز</option>
                 </select>
             </div>
             <div id="responsesByEmployeeList"></div>
@@ -241,22 +245,20 @@
 
         <h2 data-translate="your_questions_title" style="color: white; margin-bottom: 20px;">Your Questions</h2>
         
-        <!-- NEW FILTER FOR EMPLOYEE DASHBOARD -->
-        <!-- FIXED: Add onchange event to ALL radio buttons -->
-<div class="employee-filter-container">
-    <label>
-        <input type="radio" name="employeeQuestionFilter" value="all" onchange="filterEmployeeQuestions()" checked>
-        <span data-translate="filter_all">All</span>
-    </label>
-    <label>
-        <input type="radio" name="employeeQuestionFilter" value="unanswered" onchange="filterEmployeeQuestions()">
-        <span data-translate="filter_unanswered">Unanswered</span>
-    </label>
-    <label>
-        <input type="radio" name="employeeQuestionFilter" value="answered" onchange="filterEmployeeQuestions()">
-        <span data-translate="filter_answered">Answered</span>
-    </label>
-</div>
+        <div class="employee-filter-container">
+            <label>
+                <input type="radio" name="employeeQuestionFilter" value="all" onchange="filterEmployeeQuestions()" checked>
+                <span data-translate="filter_all">All</span>
+            </label>
+            <label>
+                <input type="radio" name="employeeQuestionFilter" value="unanswered" onchange="filterEmployeeQuestions()">
+                <span data-translate="filter_unanswered">Unanswered</span>
+            </label>
+            <label>
+                <input type="radio" name="employeeQuestionFilter" value="answered" onchange="filterEmployeeQuestions()">
+                <span data-translate="filter_answered">Answered</span>
+            </label>
+        </div>
 
         <div id="employeeQuestions"></div>
     </div>
