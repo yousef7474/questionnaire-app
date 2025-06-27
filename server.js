@@ -72,7 +72,7 @@ const Response = mongoose.model('Response', ResponseSchema);
 // --- API ROUTES ---
 // =================================================================
 
-// ROBUST FILE UPLOAD ENDPOINT using Imgur
+// ROBUST FILE UPLOAD ENDPOINT using Imgur - FIXED VERSION
 app.post('/api/upload', upload.single('file'), async (req, res) => {
     if (!req.file) {
         return res.status(400).json({ message: 'No file uploaded.' });
@@ -85,11 +85,22 @@ app.post('/api/upload', upload.single('file'), async (req, res) => {
     }
 
     try {
+        // Log file details for debugging
+        console.log('File upload attempt:', {
+            originalname: req.file.originalname,
+            mimetype: req.file.mimetype,
+            size: req.file.size
+        });
+
         const form = new FormData();
-        // Imgur API expects the file buffer under the key 'image' for all file types
-        form.append('image', req.file.buffer);
-        form.append('type', 'file'); // Specify the upload type
-        form.append('name', req.file.originalname); // Keep original filename
+        
+        // Convert buffer to base64 for Imgur API
+        const base64Data = req.file.buffer.toString('base64');
+        
+        // Imgur API expects base64 data for the 'image' field
+        form.append('image', base64Data);
+        form.append('type', 'base64'); // Changed from 'file' to 'base64'
+        form.append('name', req.file.originalname);
         form.append('title', `Questionnaire Upload - ${req.file.originalname}`);
 
         const imgurResponse = await fetch('https://api.imgur.com/3/upload', {
@@ -103,11 +114,18 @@ app.post('/api/upload', upload.single('file'), async (req, res) => {
 
         const imgurData = await imgurResponse.json();
         
-        // Corrected error handling
+        // Enhanced error handling with more detailed logging
         if (!imgurResponse.ok || !imgurData.success) {
-            const errorMessage = (imgurData.data && imgurData.data.error) 
+            console.error('Imgur API Error Details:', {
+                status: imgurResponse.status,
+                statusText: imgurResponse.statusText,
+                response: imgurData
+            });
+            
+            const errorMessage = imgurData.data && imgurData.data.error
                 ? (typeof imgurData.data.error === 'string' ? imgurData.data.error : JSON.stringify(imgurData.data.error))
-                : `Imgur server responded with ${imgurResponse.status}`;
+                : `Imgur server responded with ${imgurResponse.status}: ${imgurResponse.statusText}`;
+            
             throw new Error(errorMessage);
         }
 
@@ -116,7 +134,18 @@ app.post('/api/upload', upload.single('file'), async (req, res) => {
 
     } catch (error) {
         console.error('Error during file upload to Imgur:', error);
-        res.status(500).json({ message: `Upload failed: ${error.message}` });
+        
+        // Provide more specific error messages
+        let errorMessage = 'Upload failed';
+        if (error.message.includes('Bad Request')) {
+            errorMessage = 'Invalid file format or corrupted file. Please try uploading a different file.';
+        } else if (error.message.includes('413')) {
+            errorMessage = 'File too large. Please upload a smaller file.';
+        } else {
+            errorMessage = `Upload failed: ${error.message}`;
+        }
+        
+        res.status(500).json({ message: errorMessage });
     }
 });
 
