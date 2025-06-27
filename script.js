@@ -501,7 +501,7 @@ document.getElementById('questionForm').addEventListener('submit', async functio
     }
 });
 
-// THIS FUNCTION IS NOW FIXED FOR FILE.IO
+// THIS FUNCTION IS NOW FIXED
 async function submitResponse(event, questionId) {
     event.preventDefault();
 
@@ -526,8 +526,11 @@ async function submitResponse(event, questionId) {
             const formData = new FormData();
             formData.append('file', file);
 
-            // Use File.io for simple, anonymous file hosting
-            const fileioRes = await fetch('https://file.io', {
+            // THIS IS THE FIX: Use a CORS proxy
+            const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+            const targetUrl = 'https://file.io';
+
+            const fileioRes = await fetch(proxyUrl + targetUrl, {
                 method: 'POST',
                 body: formData,
             });
@@ -543,7 +546,6 @@ async function submitResponse(event, questionId) {
                  throw new Error(`File.io reported an error: ${fileioData.message}`);
             }
             
-            // The direct link to the file
             attachmentUrl = fileioData.link;
         }
 
@@ -571,7 +573,7 @@ async function submitResponse(event, questionId) {
 
     } catch (error) {
         console.error('Upload error:', error);
-        alert(`Error: ${error.message}`);
+        alert(`Error: ${error.message}. You may need to enable the CORS Anywhere demo proxy.`);
         submitButton.disabled = false;
         submitButton.textContent = originalButtonText;
     }
