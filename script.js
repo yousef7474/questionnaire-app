@@ -254,9 +254,30 @@ function updateStats() {
     document.getElementById('pendingResponses').textContent = pendingResponses;
 }
 
-function loadQuestions() {
+// THIS IS THE KEY HELPER FUNCTION
+function getQuestionDetailsHtml(question) {
+    if (!question) return '';
+    const hasDetails = question.standard || question.indicatorNumber || question.practiceNumber || question.questionNumber;
+    if (!hasDetails) return '';
+    return `
+        <div class="question-details-grid">
+            ${question.standard ? `<span><strong>المعيار:</strong> ${question.standard}</span>` : ''}
+            ${question.indicatorNumber ? `<span><strong>المؤشر:</strong> ${question.indicatorNumber}</span>` : ''}
+            ${question.practiceNumber ? `<span><strong>الممارسة:</strong> ${question.practiceNumber}</span>` : ''}
+            ${question.questionNumber ? `<span><strong>السؤال:</strong> ${question.questionNumber}</span>` : ''}
+        </div>
+    `;
+}
+
+function loadQuestions(filterStandard = 'all') {
     const questionsList = document.getElementById('questionsList');
     questionsList.innerHTML = '';
+    
+    let filteredQuestions = [...questions];
+    if (filterStandard && filterStandard !== 'all') {
+        filteredQuestions = questions.filter(q => q.standard === filterStandard);
+    }
+    
     const getStatus = (q) => {
         const now = new Date();
         const releaseTime = new Date(q.releaseTime);
@@ -265,7 +286,7 @@ function loadQuestions() {
         if (expiryTime && now > expiryTime) return 'Expired';
         return 'Active';
     };
-    const sortedQuestions = [...questions].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    const sortedQuestions = filteredQuestions.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     sortedQuestions.forEach(q => {
         const status = getStatus(q);
         const statusClass = status === 'Active' ? 'status-active' : status === 'Scheduled' ? 'status-scheduled' : 'status-expired';
@@ -278,14 +299,7 @@ function loadQuestions() {
                 <h3>${q.title}</h3>
                 <span class="status-badge ${statusClass}">${status}</span>
             </div>
-            
-            <div style="display: flex; flex-wrap: wrap; gap: 15px; font-size: 14px; color: var(--text-secondary); margin: 10px 0;">
-                ${q.standard ? `<span><strong>المعيار:</strong> ${q.standard}</span>` : ''}
-                ${q.indicatorNumber ? `<span><strong>المؤشر:</strong> ${q.indicatorNumber}</span>` : ''}
-                ${q.practiceNumber ? `<span><strong>الممارسة:</strong> ${q.practiceNumber}</span>` : ''}
-                ${q.questionNumber ? `<span><strong>السؤال:</strong> ${q.questionNumber}</span>` : ''}
-            </div>
-
+            ${getQuestionDetailsHtml(q)}
             <p><strong>Release:</strong> ${new Date(q.releaseTime).toLocaleString()}</p>
             ${q.expiryTime ? `<p><strong>Expiry:</strong> ${new Date(q.expiryTime).toLocaleString()}</p>` : ''}
             <p><strong>Target:</strong> ${q.targetEmployees.join(', ')}</p>
@@ -311,39 +325,61 @@ function loadEmployees() {
     });
 }
 
-function loadResponses() {
+// THIS FUNCTION RENDERS THE ADMIN'S RESPONSE VIEW
+function loadResponses(filterStandard = 'all') {
     const responsesList = document.getElementById('responsesByEmployeeList');
     responsesList.innerHTML = '';
     if (responses.length === 0) {
         responsesList.innerHTML = '<div class="response-card"><p>No responses have been submitted yet.</p></div>';
         return;
     }
+
     const responsesByEmployee = responses.reduce((acc, response) => {
         (acc[response.employeeUsername] = acc[response.employeeUsername] || []).push(response);
         return acc;
     }, {});
+    
+    let hasVisibleResponses = false;
+
     const sortedUsernames = Object.keys(responsesByEmployee).sort((a, b) => {
         const empA = employees.find(e => e.username === a);
         const empB = employees.find(e => e.username === b);
         const nameA = empA ? empA.fullName.toLowerCase() : a;
         const nameB = empB ? empB.fullName.toLowerCase() : b;
-        if (nameA < nameB) return -1;
-        if (nameA > nameB) return 1;
-        return 0;
+        return nameA.localeCompare(nameB);
     });
+
     for (const username of sortedUsernames) {
         const employeeResponses = responsesByEmployee[username];
+        
+        const responsesToDisplay = (filterStandard === 'all')
+            ? employeeResponses
+            : employeeResponses.filter(r => {
+                const question = questions.find(q => q._id === r.questionId);
+                return question && question.standard === filterStandard;
+            });
+
+        if (responsesToDisplay.length === 0) {
+            continue;
+        }
+        
+        hasVisibleResponses = true;
         const employee = employees.find(e => e.username === username);
         const employeeName = employee ? employee.fullName : username;
         const employeeGroupDiv = document.createElement('div');
         employeeGroupDiv.className = 'employee-response-group';
+        
         let responsesHtml = '';
-        employeeResponses.forEach(r => {
+        responsesToDisplay.forEach(r => {
             const question = questions.find(q => q._id === r.questionId);
+            // THE HELPER FUNCTION IS CALLED HERE
             responsesHtml += `
                 <div class="response-card">
                     <div class="response-header">
-                        <div><strong>Question:</strong> ${question ? question.title : 'N/A'}</div>
+                        <div>
+                            <strong>Question:</strong> ${question ? question.title : 'N/A'}
+                            ${getQuestionDetailsHtml(question)}
+                        </div>
                         <span style="color: var(--text-secondary);">${new Date(r.submittedAt).toLocaleString()}</span>
                     </div>
                     <p><strong>Answer:</strong> <span class="response-answer ${r.answer.toLowerCase()}">${r.answer}</span></p>
@@ -351,6 +387,7 @@ function loadResponses() {
                 </div>
             `;
         });
+        
         const lang = localStorage.getItem('language') || 'en';
         const exportBtnText = lang === 'ar' ? 'تصدير لهذا الموظف' : 'Export for this Employee';
         employeeGroupDiv.innerHTML = `
@@ -358,14 +395,17 @@ function loadResponses() {
                 <h3>${employeeName} (${employee ? employee.email : 'N/A'})</h3>
                 <button class="secondary-btn" style="padding: 8px 16px; font-size: 14px;" onclick="exportResponsesForEmployee('${username}')">${exportBtnText}</button>
             </div>
-            <div class="responses-container">
-                ${responsesHtml}
-            </div>
+            <div class="responses-container">${responsesHtml}</div>
         `;
         responsesList.appendChild(employeeGroupDiv);
     }
+    
+    if (!hasVisibleResponses) {
+        responsesList.innerHTML = '<div class="response-card"><p>No responses match the selected filter.</p></div>';
+    }
 }
 
+// THIS FUNCTION RENDERS THE EMPLOYEE'S DASHBOARD
 function loadEmployeeQuestions() {
     const employeeQuestionsDiv = document.getElementById('employeeQuestions');
     employeeQuestionsDiv.innerHTML = '';
@@ -386,9 +426,32 @@ function loadEmployeeQuestions() {
         const card = document.createElement('div');
         card.className = 'question-card';
         if (existingResponse) {
-            card.innerHTML = `<h3>${q.title}</h3><div class="response-section"><p><strong data-translate="your_response">Your Response:</strong> <span class="response-answer ${existingResponse.answer.toLowerCase()}">${existingResponse.answer}</span></p>${existingResponse.attachmentUrl ? `<p><strong data-translate="attachment_label">Attachment:</strong> <a href="${existingResponse.attachmentUrl}" class="attachment-link" target="_blank" download data-translate="view_attachment_link">View Attachment</a></p>` : ''}<p style="color: var(--text-secondary); margin-top: 10px;"><span data-translate="submitted_on">Submitted on:</span> ${new Date(existingResponse.submittedAt).toLocaleString()}</p></div>`;
+            // THE HELPER FUNCTION IS CALLED HERE (FOR ANSWERED QUESTIONS)
+            card.innerHTML = `
+                <h3>${q.title}</h3>
+                ${getQuestionDetailsHtml(q)}
+                <div class="response-section">
+                    <p><strong data-translate="your_response">Your Response:</strong> <span class="response-answer ${existingResponse.answer.toLowerCase()}">${existingResponse.answer}</span></p>
+                    ${existingResponse.attachmentUrl ? `<p><strong data-translate="attachment_label">Attachment:</strong> <a href="${existingResponse.attachmentUrl}" class="attachment-link" target="_blank" download data-translate="view_attachment_link">View Attachment</a></p>` : ''}
+                    <p style="color: var(--text-secondary); margin-top: 10px;"><span data-translate="submitted_on">Submitted on:</span> ${new Date(existingResponse.submittedAt).toLocaleString()}</p>
+                </div>`;
         } else {
-            card.innerHTML = `<h3>${q.title}</h3><form onsubmit="submitResponse(event, '${q._id}')"><div class="radio-group"><label class="radio-label"><input type="radio" name="answer_${q._id}" value="Yes" required><span data-translate="yes_option">Yes</span></label><label class="radio-label"><input type="radio" name="answer_${q._id}" value="No" required><span data-translate="no_option">No</span></label></div><div class="attachment-section"><label data-translate="attachment_label_optional">Attachment (Optional):</label><input type="file" id="attachment_${q._id}" accept="image/*,.pdf,.doc,.docx"><input type="url" id="url_${q._id}" data-translate-placeholder="paste_url_placeholder" placeholder="Or paste a URL"></div><button type="submit" class="secondary-btn" data-translate="submit_response_btn">Submit Response</button></form>`;
+            // THE HELPER FUNCTION IS CALLED HERE (FOR UNANSWERED QUESTIONS)
+            card.innerHTML = `
+                <h3>${q.title}</h3>
+                ${getQuestionDetailsHtml(q)}
+                <form onsubmit="submitResponse(event, '${q._id}')">
+                    <div class="radio-group">
+                        <label class="radio-label"><input type="radio" name="answer_${q._id}" value="Yes" required><span data-translate="yes_option">Yes</span></label>
+                        <label class="radio-label"><input type="radio" name="answer_${q._id}" value="No" required><span data-translate="no_option">No</span></label>
+                    </div>
+                    <div class="attachment-section">
+                        <label data-translate="attachment_label_optional">Attachment (Optional):</label>
+                        <input type="file" id="attachment_${q._id}" accept="image/*,.pdf,.doc,.docx">
+                        <input type="url" id="url_${q._id}" data-translate-placeholder="paste_url_placeholder" placeholder="Or paste a URL">
+                    </div>
+                    <button type="submit" class="secondary-btn" data-translate="submit_response_btn">Submit Response</button>
+                </form>`;
         }
         employeeQuestionsDiv.appendChild(card);
     });
@@ -461,16 +524,12 @@ async function submitResponse(event, questionId) {
             formData.append('file', file);
             formData.append('upload_preset', config.uploadPreset);
 
-            // For PDFs and other documents, use raw resource type
             let uploadUrl = `https://api.cloudinary.com/v1_1/${config.cloudName}/raw/upload`;
             
             if (!file.type.startsWith('image/')) {
                 formData.append('resource_type', 'raw');
-                // Add flags for better PDF handling
                 formData.append('flags', 'attachment');
             }
-
-            console.log(`Uploading ${file.name} (${file.type}) to ${uploadUrl}`);
 
             const cloudinaryRes = await fetch(uploadUrl, {
                 method: 'POST',
@@ -484,22 +543,14 @@ async function submitResponse(event, questionId) {
             }
 
             const cloudinaryData = await cloudinaryRes.json();
-            console.log('Cloudinary response:', cloudinaryData);
             
-            // For PDFs, modify the URL to ensure proper delivery
             let finalUrl = cloudinaryData.secure_url;
             
-            // If it's a PDF, add delivery parameters for better compatibility
             if (file.type === 'application/pdf') {
-                // Option 1: Force download
                 finalUrl = finalUrl.replace('/upload/', '/upload/fl_attachment/');
-                
-                // Option 2: Alternative - use image delivery for PDFs (uncomment if needed)
-                // finalUrl = finalUrl.replace('/raw/upload/', '/image/upload/f_auto,fl_attachment/');
             }
             
             attachmentUrl = finalUrl;
-            console.log('Final attachment URL:', attachmentUrl);
         }
 
         submitButton.textContent = 'Saving response...';
@@ -572,9 +623,7 @@ async function editEmployee(id, currentDepartment) {
     try {
         const res = await fetch(`${API_URL}/employees/${id}`, {
             method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(updates),
         });
         if (!res.ok) {
@@ -617,6 +666,16 @@ function reassignQuestion(questionId) {
 // --- Helper & Utility Functions ---
 // =================================================================
 
+function filterQuestions() {
+    const filterValue = document.getElementById('questionFilterStandard').value;
+    loadQuestions(filterValue);
+}
+
+function filterResponses() {
+    const filterValue = document.getElementById('responseFilterStandard').value;
+    loadResponses(filterValue);
+}
+
 function showRegister() { document.getElementById('loginScreen').classList.add('hidden'); document.getElementById('registerScreen').classList.remove('hidden'); }
 function showLogin() { document.getElementById('registerScreen').classList.add('hidden'); document.getElementById('loginScreen').classList.remove('hidden'); }
 
@@ -637,6 +696,15 @@ function showAdminTab(tab) {
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     document.getElementById(`${tab}Tab`).classList.remove('hidden');
     document.querySelector(`.tab[onclick="showAdminTab('${tab}')"]`).classList.add('active');
+    
+    if (tab === 'manage') {
+        document.getElementById('questionFilterStandard').value = 'all';
+        loadQuestions();
+    }
+    if (tab === 'responses') {
+        document.getElementById('responseFilterStandard').value = 'all';
+        loadResponses();
+    }
 }
 
 function loadEmployeeOptions() {
